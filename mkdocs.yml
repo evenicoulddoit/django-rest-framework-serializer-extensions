@@ -1,0 +1,4 @@
+site_name: djangorestframework-serializer-extensions
+site_description: Extensions to DRY up Django Rest Framework serializers
+repo_url: https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions
+site_dir: html
