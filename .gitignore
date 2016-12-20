@@ -1,5 +1,7 @@
 .cache
+.coverage
 .tox
 html
+coverage.xml
 *.pyc
 *.egg-info

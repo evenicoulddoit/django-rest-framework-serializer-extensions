@@ -71,6 +71,18 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         pytest_args = sys.argv[1:]
         first_arg = pytest_args[0]
+
+        try:
+            pytest_args.remove('--coverage')
+        except ValueError:
+            pass
+        else:
+            pytest_args = [
+                '--cov-report',
+                'xml',
+                '--cov',
+                'rest_framework_serializer_extensions'] + pytest_args
+
         if first_arg.startswith('-'):
             # `runtests.py [flags]`
             pytest_args = ['tests'] + pytest_args
