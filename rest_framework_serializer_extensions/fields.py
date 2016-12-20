@@ -2,6 +2,7 @@ from django.db import models
 from rest_framework.fields import Field
 from rest_framework.relations import (
     HyperlinkedIdentityField, HyperlinkedRelatedField)
+import six
 
 from rest_framework_serializer_extensions import utils
 
@@ -26,7 +27,7 @@ class GetHashIdModelMixin(object):
                 return getattr(self.parent, custom_fn_name)
             else:
                 return self.parent.Meta.model
-        elif isinstance(self.model, basestring):
+        elif isinstance(self.model, six.string_types):
             obj = utils.import_local(self.model)
             assert issubclass(obj, models.Model), (
                 '{0} is not a Django model'.format(self.model)

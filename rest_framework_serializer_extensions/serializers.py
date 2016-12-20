@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 from cached_property import cached_property
 from rest_framework import serializers
+import six
 
 from rest_framework_serializer_extensions import (
     fields as custom_fields, utils
@@ -184,7 +185,7 @@ class ExpandableFieldsMixin(object):
     def _standardise_expandable_definitions(self, expandable_fields):
         return {
             key: self._standardise_expandable_definition(definition)
-            for key, definition in expandable_fields.iteritems()
+            for key, definition in six.iteritems(expandable_fields)
         }
 
     def _standardise_expandable_definition(self, definition):
@@ -195,7 +196,7 @@ class ExpandableFieldsMixin(object):
             definition = dict(serializer=definition)
 
         # Resolve string references to serializers
-        if isinstance(definition['serializer'], basestring):
+        if isinstance(definition['serializer'], six.string_types):
             reference = definition['serializer']
             serializer = utils.import_local(reference)
             assert issubclass(serializer, serializers.BaseSerializer), (
@@ -232,7 +233,7 @@ class ExpandableFieldsMixin(object):
     def _validate_max_depth(self, root_instructions):
         max_depth = self.get_max_expand_depth()
 
-        for nested_field_names in root_instructions.itervalues():
+        for nested_field_names in six.itervalues(root_instructions):
             for nested_field_name in nested_field_names:
                 depth = len(nested_field_name.split(NESTED_DELIMITER))
 
@@ -261,7 +262,7 @@ class ExpandableFieldsMixin(object):
         hierarchy = _get_serializer_hierarchy(self)
         instructions = {}
 
-        for method, root_nested_names in root_instructions.iteritems():
+        for method, root_nested_names in six.iteritems(root_instructions):
             instructions[method] = {
                 n.split(NESTED_DELIMITER)[0]
                 for n in _get_nested_field_names(hierarchy, root_nested_names)
@@ -343,7 +344,7 @@ class ExpandableFieldsMixin(object):
         ):
             return
 
-        for method, field_names in instructions.iteritems():
+        for method, field_names in six.iteritems(instructions):
             valid_field_names = set(self.expandable_fields)
 
             # Allow unmatched full expand instructions provided that the
@@ -374,8 +375,10 @@ class ExpandableFieldsMixin(object):
         instructions = self._expand_instructions(root_instructions)
         self._validate_instructions(instructions, standard_fields)
 
+        field_iterator = six.iteritems(self.expandable_fields)
+
         # Expand fields according to their definition and instructions
-        for field_name, field_definition in self.expandable_fields.iteritems():
+        for field_name, field_definition in field_iterator:
             # Always provide an ID reference for ForeignKeys
             if (
                 not field_definition.get('many') and
@@ -455,7 +458,7 @@ class OnlyFieldsMixin(object):
 
         return {
             name: field
-            for name, field in fields.iteritems()
+            for name, field in six.iteritems(fields)
             if name in only_names
         }
 
@@ -495,7 +498,7 @@ class ExcludeFieldsMixin(object):
 
         return {
             name: field
-            for name, field in fields.iteritems()
+            for name, field in six.iteritems(fields)
             if name not in exclude_names
         }
 
