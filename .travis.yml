@@ -1,0 +1,54 @@
+language: python
+
+python:
+    - "3.5"
+
+sudo: false
+
+env:
+    - TOX_ENV=py27-flake8
+    - TOX_ENV=py27-docs
+    - TOX_ENV=py27-django18-drf33
+    - TOX_ENV=py27-django18-drf34
+    - TOX_ENV=py27-django18-drf35
+    - TOX_ENV=py27-django19-drf33
+    - TOX_ENV=py27-django19-drf34
+    - TOX_ENV=py27-django19-drf35
+    - TOX_ENV=py27-django110-drf33
+    - TOX_ENV=py27-django110-drf34
+    - TOX_ENV=py27-django110-drf35
+    - TOX_ENV=py34-django18-drf33
+    - TOX_ENV=py34-django18-drf34
+    - TOX_ENV=py34-django18-drf35
+    - TOX_ENV=py34-django19-drf33
+    - TOX_ENV=py34-django19-drf34
+    - TOX_ENV=py34-django19-drf35
+    - TOX_ENV=py34-django110-drf33
+    - TOX_ENV=py34-django110-drf34
+    - TOX_ENV=py34-django110-drf35
+    - TOX_ENV=py35-django18-drf33
+    - TOX_ENV=py35-django18-drf34
+    - TOX_ENV=py35-django18-drf35
+    - TOX_ENV=py35-django19-drf33
+    - TOX_ENV=py35-django19-drf34
+    - TOX_ENV=py35-django19-drf35
+    - TOX_ENV=py35-django110-drf33
+    - TOX_ENV=py35-django110-drf34
+    - TOX_ENV=py35-django110-drf35
+
+matrix:
+    fast_finish: true
+
+install:
+    # Virtualenv < 14 is required to keep the Python 3.2 builds running.
+    - pip install tox "virtualenv<14"
+
+script:
+    - tox -e $TOX_ENV
+
+after_success:
+    - pip install codecov
+    - codecov -e TOX_ENV
+
+notifications:
+    email: false
