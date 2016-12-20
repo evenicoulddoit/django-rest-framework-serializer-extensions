@@ -1,0 +1,51 @@
+[
+  {
+    "model": "tests.owner",
+    "pk": 1,
+    "fields": {
+      "name": "Tyrell",
+      "email": "t.wellick@e-corp.com",
+      "organization": 1
+    }
+  },
+  {
+    "model": "tests.organization",
+    "pk": 1,
+    "fields": {
+      "name": "E Corp"
+    }
+  },
+  {
+    "model": "tests.sku",
+    "pk": 1,
+    "fields": {
+      "variant": "P100D",
+      "model": 1,
+      "owners": [1]
+    }
+  },
+  {
+    "model": "tests.sku",
+    "pk": 2,
+    "fields": {
+      "variant": "70",
+      "model": 1,
+      "owners": []
+    }
+  },
+  {
+    "model": "tests.carmodel",
+    "pk": 1,
+    "fields": {
+      "name": "Model S",
+      "manufacturer": 1
+    }
+  },
+  {
+    "model": "tests.manufacturer",
+    "pk": 1,
+    "fields": {
+      "name": "Tesla"
+    }
+  }
+]
