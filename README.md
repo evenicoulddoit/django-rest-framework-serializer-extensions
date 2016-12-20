@@ -1,21 +1,22 @@
-djangorestframework-serializer-extensions
-======================================
+Django REST framework serializer extensions
+===========================================
 
 [![build-status-image]][travis]
 [![coverage-status-image]][codecov]
 [![pypi-version]][pypi]
 
+
 Overview
 ========
 
-Extensions to DRY up Django Rest Framework serializers
+**A collection of useful tools to DRY up your Django Rest Framework serializers**
 
 Requirements
 ============
 
 -   Python (2.7, 3.3, 3.4)
--   Django (1.6, 1.7, 1.8)
--   Django REST Framework (2.4, 3.0, 3.1)
+-   Django (1.8, 1.9, 1.10)
+-   Django REST Framework (3.3, 3.4, 3.5)
 
 Installation
 ============
