@@ -1,0 +1,5 @@
+.cache
+.tox
+html
+*.pyc
+*.egg-info
