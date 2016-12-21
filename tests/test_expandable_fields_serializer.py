@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from django.test import override_settings
 from rest_framework import serializers
 
+from rest_framework_serializer_extensions import utils
 from rest_framework_serializer_extensions.serializers import (
     ExpandableFieldsMixin
 )
@@ -40,7 +41,8 @@ class CarModelTestSerializer(
             manufacturer=ManufacturerTestSerializer,
             skus=dict(
                 serializer='{0}.SkuTestSerializer'.format(MODULE),
-                many=True
+                many=True,
+                source='skus.all'
             )
         )
 
@@ -125,6 +127,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             .data
         )
 
+    def expand_instance_id(self, instance):
+        return instance.pk
+
     def test_no_expansion(self):
         """
         Test when nothing is passed to the serializer, nothing is expanded.
@@ -137,7 +142,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
-                organization_id=self.organization_ecorp.pk
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                )
             )
         )
 
@@ -152,7 +159,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
-                organization_id=self.organization_ecorp.pk,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
                 organization=dict(
                     id=self.organization_ecorp.pk,
                     name=self.organization_ecorp.name
@@ -169,12 +178,14 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
-                organization_id=self.organization_ecorp.pk,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
                 cars=[
                     dict(
                         id=self.sku_p100d.pk,
                         variant=self.sku_p100d.variant,
-                        model_id=self.sku_p100d.model_id
+                        model_id=self.expand_instance_id(self.carmodel_model_s)
                     )
                 ]
             )
@@ -192,8 +203,10 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
-                organization_id=self.organization_ecorp.pk,
-                cars=[self.sku_p100d.pk],
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
+                cars=[self.expand_instance_id(self.sku_p100d)],
             )
         )
 
@@ -210,7 +223,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
-                organization_id=self.organization_ecorp.pk,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
                 identities=dict(
                     email=self.owner_tyrell.email
                 )
@@ -226,7 +241,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
-                organization_id=self.organization_ecorp.pk,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
                 identities=dict(
                     email=self.owner_tyrell.email
                 ),
@@ -238,7 +255,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                     dict(
                         id=self.sku_p100d.pk,
                         variant=self.sku_p100d.variant,
-                        model_id=self.sku_p100d.model_id
+                        model_id=self.expand_instance_id(
+                            self.carmodel_model_s
+                        )
                     )
                 ],
             )
@@ -253,17 +272,21 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
-                organization_id=self.organization_ecorp.pk,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
                 cars=[
                     dict(
                         id=self.sku_p100d.pk,
                         variant=self.sku_p100d.variant,
-                        model_id=self.sku_p100d.model_id,
+                        model_id=self.expand_instance_id(
+                            self.carmodel_model_s
+                        ),
                         model=dict(
                             id=self.carmodel_model_s.pk,
                             name=self.carmodel_model_s.name,
-                            manufacturer_id=(
-                                self.carmodel_model_s.manufacturer_id
+                            manufacturer_id=self.expand_instance_id(
+                                self.manufacturer_tesla
                             ),
                             manufacturer=dict(
                                 id=self.manufacturer_tesla.pk,
@@ -297,12 +320,14 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                     dict(
                         id=self.sku_p100d.pk,
                         variant=self.sku_p100d.variant,
-                        model_id=self.sku_p100d.model_id,
+                        model_id=self.expand_instance_id(
+                            self.carmodel_model_s
+                        ),
                         model=dict(
                             id=self.carmodel_model_s.pk,
                             name=self.carmodel_model_s.name,
-                            manufacturer_id=(
-                                self.carmodel_model_s.manufacturer_id
+                            manufacturer_id=self.expand_instance_id(
+                                self.manufacturer_tesla
                             ),
                         )
                     )
@@ -319,19 +344,26 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
-                organization_id=self.organization_ecorp.pk,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
                 cars=[
                     dict(
                         id=self.sku_p100d.pk,
                         variant=self.sku_p100d.variant,
-                        model_id=self.sku_p100d.model_id,
+                        model_id=self.expand_instance_id(
+                            self.carmodel_model_s
+                        ),
                         model=dict(
                             id=self.carmodel_model_s.pk,
                             name=self.carmodel_model_s.name,
-                            manufacturer_id=(
-                                self.carmodel_model_s.manufacturer_id
+                            manufacturer_id=self.expand_instance_id(
+                                self.manufacturer_tesla
                             ),
-                            skus=[self.sku_p100d.pk, self.sku_70.pk]
+                            skus=[
+                                self.expand_instance_id(self.sku_p100d),
+                                self.expand_instance_id(self.sku_70)
+                            ]
                         )
                     )
                 ]
@@ -394,3 +426,26 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
     def test_unmatched_nested_field_not_id_expandable(self):
         with self.assertRaises(ValueError):
             self.serialize(expand_id_only={'organization__not_found'})
+
+
+@override_settings(
+    REST_FRAMEWORK=dict(
+        SERIALIZER_EXTENSIONS=dict(
+            USE_HASH_IDS=True,
+            HASH_IDS_SOURCE='tests.base.TEST_HASH_IDS'
+        )
+    )
+)
+class HashidsExpandableFieldsSerializerMixinTests(
+    ExpandableFieldsSerializerMixinTests
+):
+    """
+    Functional tests for the ExpandableFieldsSerializerMixin using HashIds.
+
+    Uses the same test cases as before, but expected HashIds to be used
+    whenever the mixin has expanded fields.
+    """
+    def expand_instance_id(self, instance):
+        return utils.external_id_from_model_and_internal_id(
+            type(instance), instance.pk
+        )

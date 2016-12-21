@@ -2,7 +2,12 @@ from __future__ import absolute_import
 
 from cached_property import cached_property
 from django.test import TestCase
+from hashids import Hashids
+
 from tests import models
+
+
+TEST_HASH_IDS = Hashids(salt='testing')
 
 
 class SerializerMixinTestCase(TestCase):

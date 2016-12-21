@@ -295,11 +295,12 @@ class ExpandableFieldsMixin(object):
         if 'id_source' in field_definition:
             kwargs.update(source=field_definition['id_source'])
 
-        if utils.get_setting('USE_HASHIDS', False):
-            kwargs.update(model=field_definition['id_model'])
-            return custom_fields.HashIdField(**kwargs)
-        else:
-            return serializers.IntegerField(**kwargs)
+        if utils.get_setting('USE_HASH_IDS', False):
+            kwargs.update(pk_field=(
+                custom_fields.HashIdField(model=field_definition['id_model'])
+            ))
+
+        return serializers.PrimaryKeyRelatedField(**kwargs)
 
     def get_expand_id_list_field(self, field_name, field_definition):
         """
@@ -325,17 +326,17 @@ class ExpandableFieldsMixin(object):
                 "Can only expand as ID-only on *-to-many fields"
             )
 
-        kwargs = dict(read_only=True)
+        kwargs = dict(many=True, read_only=True)
 
         if 'source' in field_definition:
             kwargs.update(source=field_definition['source'])
 
-        # TODO - Look at pk_field on PrimaryKeyRelatedField
-        if utils.get_setting('USE_HASHIDS', False):
-            kwargs.update(model=field_definition['id_model'])
-            return custom_fields.HashIdListField(**kwargs)
-        else:
-            return serializers.PrimaryKeyRelatedField(many=True, **kwargs)
+        if utils.get_setting('USE_HASH_IDS', False):
+            kwargs.update(pk_field=(
+                custom_fields.HashIdField(model=field_definition['id_model'])
+            ))
+
+        return serializers.PrimaryKeyRelatedField(**kwargs)
 
     def _validate_instructions(self, instructions, standard_fields):
         if (

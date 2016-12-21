@@ -8,6 +8,10 @@ from rest_framework_serializer_extensions import utils
 
 
 class GetHashIdModelMixin(object):
+    def __init__(self, *args, **kwargs):
+        self.model = kwargs.pop('model', None)
+        super(GetHashIdModelMixin, self).__init__(*args, **kwargs)
+
     def get_model(self):
         """
         Return the model to generate the HashId for.
@@ -46,10 +50,6 @@ class HashIdField(GetHashIdModelMixin, Field):
     """
     allow_null = True
 
-    def __init__(self, *args, **kwargs):
-        self.model = kwargs.pop('model', None)
-        super(HashIdField, self).__init__(*args, **kwargs)
-
     def to_representation(self, value):
         return utils.external_id_from_model_and_internal_id(
             self.get_model(), value
@@ -61,40 +61,7 @@ class HashIdField(GetHashIdModelMixin, Field):
         )
 
 
-class HashIdListField(HashIdField):
-    """
-    Return a list of external IDs (using HashIds).
-
-    The "source" here should point to an iterable (e.g. a QuerySet),
-    and the keyword "individual_source" (defaults to "id") should be specified
-    to provide the source to each HashIdField.
-    """
-    def __init__(self, *args, **kwargs):
-        self.individual_source = kwargs.pop('individual_source', 'id')
-        super(HashIdListField, self).__init__(*args, **kwargs)
-
-    def to_representation(self, values):
-        return [
-            super(HashIdListField, self).to_representation(
-                getattr(value, self.individual_source)
-            )
-            for value in values
-        ]
-
-    def to_internal_value(self, values):
-        return [
-            super(HashIdListField, self).to_internal_value(
-                getattr(value, self.individual_source)
-            )
-            for value in values
-        ]
-
-
 class HashedHyperlinkMixin(GetHashIdModelMixin):
-    def __init__(self, *args, **kwargs):
-        self.model = kwargs.pop('model', None)
-        super(HashedHyperlinkMixin, self).__init__(*args, **kwargs)
-
     def get_url(self, obj, view_name, request, format):
         """
         Use the field source in combination with the model to generate the URL.

@@ -1,6 +1,8 @@
 .cache
 .coverage
 .tox
+build
+dist
 html
 coverage.xml
 *.pyc
