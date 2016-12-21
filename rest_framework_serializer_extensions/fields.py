@@ -28,14 +28,25 @@ class GetHashIdModelMixin(object):
             custom_fn_name = 'get_{0}_model'.format(self.field_name)
 
             if hasattr(self.parent, custom_fn_name):
-                return getattr(self.parent, custom_fn_name)
+                return getattr(self.parent, custom_fn_name)()
             else:
-                return self.parent.Meta.model
+                try:
+                    return self.parent.Meta.model
+                except AttributeError:
+                    raise AssertionError(
+                        'No "model" value passed to field "{0}"'
+                        .format(type(self).__name__)
+                    )
         elif isinstance(self.model, six.string_types):
             obj = utils.import_local(self.model)
-            assert issubclass(obj, models.Model), (
-                '{0} is not a Django model'.format(self.model)
-            )
+
+            try:
+                assert issubclass(obj, models.Model)
+            except (AssertionError, TypeError):
+                raise AssertionError(
+                    '"{0}"" is not a Django model'.format(self.model)
+                )
+
             return obj
         else:
             return self.model
@@ -48,8 +59,6 @@ class HashIdField(GetHashIdModelMixin, Field):
     Requires the source of the field to be an internal ID, and to provide
     a "model" keyword argument. Together these will produce the external ID.
     """
-    allow_null = True
-
     def to_representation(self, value):
         return utils.external_id_from_model_and_internal_id(
             self.get_model(), value
