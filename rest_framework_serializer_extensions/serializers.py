@@ -288,7 +288,7 @@ class ExpandableFieldsMixin(object):
             (rest_framework.fields.Field)
         """
         if hasattr(self, 'get_{0}_id'.format(field_name)):
-            return serializers.SerializerMethodField()
+            return serializers.SerializerMethodField(source='*')
 
         kwargs = dict(read_only=True)
 
@@ -318,7 +318,8 @@ class ExpandableFieldsMixin(object):
         # A SerializerMethodField can be used for custom ID generation
         if hasattr(self, method_field_name):
             return serializers.SerializerMethodField(
-                method_name=method_field_name
+                method_name=method_field_name,
+                source='*'
             )
 
         if not field_definition.get('many'):

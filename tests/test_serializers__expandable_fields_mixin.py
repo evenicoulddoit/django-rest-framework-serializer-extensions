@@ -335,6 +335,55 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             )
         )
 
+    def test_custom_id_field(self):
+        """
+        Methods can be provided to generate custom ID fields.
+
+        A SerializerMethodField is passed with the object as it's source.
+        """
+        class CustomIdSerializer(OwnerTestSerializer):
+            def get_organization_id(self, owner):
+                return "{0}-{1}".format(owner.name, owner.organization.name)
+
+        serialized = CustomIdSerializer(self.owner_tyrell).data
+        self.assertDictEqual(
+            serialized,
+            dict(
+                id=self.owner_tyrell.pk,
+                name=self.owner_tyrell.name,
+                organization_id="{0}-{1}".format(
+                    self.owner_tyrell.name, self.organization_ecorp.name
+                )
+            )
+        )
+
+    def test_custom_id_only_field(self):
+        """
+        Methods can be provided to generate custom ID fields.
+
+        A SerializerMethodField is passed with the object as it's source.
+        """
+        class CustomIdSerializer(OwnerTestSerializer):
+            def get_cars_id_only(self, owner):
+                return [car.variant for car in owner.cars.all()]
+
+        serialized = CustomIdSerializer(
+            self.owner_tyrell,
+            context=dict(expand_id_only={'cars'})
+        ).data
+
+        self.assertDictEqual(
+            serialized,
+            dict(
+                id=self.owner_tyrell.pk,
+                name=self.owner_tyrell.name,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
+                cars=[self.sku_p100d.variant]
+            )
+        )
+
     def test_nested_id_only_expansion(self):
         """
         Nested ID expansion implies full expansion until the last node.
@@ -426,6 +475,75 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
     def test_unmatched_nested_field_not_id_expandable(self):
         with self.assertRaises(ValueError):
             self.serialize(expand_id_only={'organization__not_found'})
+
+    def test_can_ignore_matching_validation_through_context(self):
+        self.assertDictEqual(
+            self.serialize(
+                expand={'organization', 'not_found'},
+                validate_expand_instructions=False
+            ),
+            dict(
+                id=self.owner_tyrell.pk,
+                name=self.owner_tyrell.name,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
+                organization=dict(
+                    id=self.organization_ecorp.pk,
+                    name=self.organization_ecorp.name
+                )
+            )
+        )
+
+    def test_can_ignore_matching_validation_through_meta(self):
+        class IgnoreSerializer(OwnerTestSerializer):
+            class Meta(OwnerTestSerializer.Meta):
+                validate_expand_instructions = False
+
+        serialized = IgnoreSerializer(
+            self.owner_tyrell,
+            context=dict(expand={'organization', 'not_found'})
+        ).data
+
+        self.assertDictEqual(
+            serialized,
+            dict(
+                id=self.owner_tyrell.pk,
+                name=self.owner_tyrell.name,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
+                organization=dict(
+                    id=self.organization_ecorp.pk,
+                    name=self.organization_ecorp.name
+                )
+            )
+        )
+
+    def test_can_ignore_matching_validation_through_method(self):
+        class IgnoreSerializer(OwnerTestSerializer):
+            def get_validate_expand_instructions(self):
+                return False
+
+        serialized = IgnoreSerializer(
+            self.owner_tyrell,
+            context=dict(expand={'organization', 'not_found'})
+        ).data
+
+        self.assertDictEqual(
+            serialized,
+            dict(
+                id=self.owner_tyrell.pk,
+                name=self.owner_tyrell.name,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
+                organization=dict(
+                    id=self.organization_ecorp.pk,
+                    name=self.organization_ecorp.name
+                )
+            )
+        )
 
 
 @override_settings(
