@@ -39,12 +39,7 @@ def get_hash_ids_source():
     if not source_str:
         raise AssertionError('No HASH_IDS_SOURCE setting configured.')
 
-    try:
-        return import_local(source_str)
-    except ImportError:
-        raise ValueError(
-            'HASH_IDS_SOURCE "{0}" not found'.format(source_str)
-        )
+    return import_local(source_str)
 
 
 def external_id_from_model_and_internal_id(model, internal_id):

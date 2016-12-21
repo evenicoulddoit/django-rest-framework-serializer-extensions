@@ -32,6 +32,7 @@ def pytest_configure():
 
             'rest_framework',
             'rest_framework.authtoken',
+            'rest_framework_serializer_extensions',
             'tests',
         ),
         PASSWORD_HASHERS=(
