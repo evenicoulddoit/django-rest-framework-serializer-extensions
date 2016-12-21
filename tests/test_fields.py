@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 from django.core.urlresolvers import reverse
-from django.template import RequestContext
 from django.test import override_settings, RequestFactory, TestCase
 from rest_framework.serializers import Serializer, ModelSerializer
 
