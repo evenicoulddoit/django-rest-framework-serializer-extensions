@@ -2,8 +2,6 @@ from __future__ import absolute_import
 
 from django.contrib.contenttypes.models import ContentType
 from django.test import override_settings, TestCase
-from rest_framework import serializers
-import pytest
 
 from rest_framework_serializer_extensions import fields, utils
 from tests import models
