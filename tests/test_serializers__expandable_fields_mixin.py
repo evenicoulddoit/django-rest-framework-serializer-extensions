@@ -14,7 +14,7 @@ from tests.base import SerializerMixinTestCase
 """
 START TEST SERIALIZERS
 """
-MODULE = 'tests.test_expandable_fields_serializer'
+MODULE = 'tests.test_serializers__expandable_fields_mixin'
 
 
 class ManufacturerTestSerializer(
