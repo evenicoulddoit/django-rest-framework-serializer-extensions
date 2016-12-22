@@ -106,6 +106,41 @@ class OwnerWithCarsTestSerializer(
         fields = ('id', 'name', 'cars')
 
 
+class OwnerWithMethodFieldTestSerializer(
+    ExpandableFieldsMixin, serializers.ModelSerializer
+):
+    class Meta:
+        model = models.Owner
+        fields = ('id', 'name')
+        expandable_fields = dict(
+            cars=serializers.SerializerMethodField
+        )
+
+    def get_cars(self, obj):
+        return [sku.variant for sku in obj.cars.all()]
+
+
+class OwnerWithCustomIdSourceTestSerializer(
+    ExpandableFieldsMixin, serializers.ModelSerializer
+):
+    """
+    Test serializer using an expanded field with a customer ID source.
+
+    This can be useful for serializing non-Django model instances, or
+    instances which have a reverse ForeignKey (i.e. the ForeignKey row is
+    stored on the related model's table).
+    """
+    class Meta:
+        model = models.Owner
+        fields = ('id', 'name')
+        expandable_fields = dict(
+            organization=dict(
+                serializer=OrganizationTestSerializer,
+                id_source='organization.pk'
+            )
+        )
+
+
 """
 END TEST SERIALIZERS
 """
@@ -332,6 +367,73 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                         )
                     )
                 ]
+            )
+        )
+
+    def test_custom_id_source_unexpanded(self):
+        """
+        Providing a custom 'id_source' should work as expected.
+        """
+        self.assertDictEqual(
+            OwnerWithCustomIdSourceTestSerializer(self.owner_tyrell).data,
+            dict(
+                id=self.owner_tyrell.pk,
+                name=self.owner_tyrell.name,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                )
+            )
+        )
+
+    def test_custom_id_source_expanded(self):
+        """
+        Providing a custom 'id_source' should not affect expansion
+        """
+        serialized = OwnerWithCustomIdSourceTestSerializer(
+            self.owner_tyrell, context=dict(expand={'organization'})
+        ).data
+
+        self.assertDictEqual(
+            serialized,
+            dict(
+                id=self.owner_tyrell.pk,
+                name=self.owner_tyrell.name,
+                organization_id=self.expand_instance_id(
+                    self.organization_ecorp
+                ),
+                organization=dict(
+                    id=self.organization_ecorp.pk,
+                    name=self.organization_ecorp.name
+                )
+            )
+        )
+
+    def test_method_field_serializer_unexpanded(self):
+        """
+        Unexpanded SerializerMethodFields never have an ID source.
+        """
+        self.assertDictEqual(
+            OwnerWithMethodFieldTestSerializer(self.owner_tyrell).data,
+            dict(
+                id=self.owner_tyrell.pk,
+                name=self.owner_tyrell.name,
+            )
+        )
+
+    def test_method_field_serializer_expanded(self):
+        """
+        Unexpanded SerializerMethodFields never have an ID source.
+        """
+        serialized = OwnerWithMethodFieldTestSerializer(
+            self.owner_tyrell, context=dict(expand={'cars'})
+        ).data
+
+        self.assertDictEqual(
+            serialized,
+            dict(
+                id=self.owner_tyrell.pk,
+                name=self.owner_tyrell.name,
+                cars=[self.sku_p100d.variant]
             )
         )
 
