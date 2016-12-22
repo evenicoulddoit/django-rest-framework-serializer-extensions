@@ -13,10 +13,10 @@ be whitelisted, blacklisted, and child serializers can be optionally expanded.
 
 Support for [HashIds](https://github.com/davidaurelio/hashids-python) is
 also provided. If you're currently exposing your internal IDs over a public
-API, we suggest you consider switching the HashIDs instead.
+API, we suggest you consider switching to HashIDs instead.
 
 ## Requirements
-* Python (2.7, 3.3, 3.4)
+* Python (2.7, 3.4, 3.5)
 * Django (1.8, 1.9, 1.10)
 * Django REST Framework (3.3, 3.4, 3.5)
 
