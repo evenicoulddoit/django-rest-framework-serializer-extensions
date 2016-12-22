@@ -1,8 +1,8 @@
 from django.db import models
+from django.utils import six
 from rest_framework.fields import Field
 from rest_framework.relations import (
     HyperlinkedIdentityField, HyperlinkedRelatedField)
-import six
 
 from rest_framework_serializer_extensions import utils
 

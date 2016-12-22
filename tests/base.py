@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-from cached_property import cached_property
 from django.test import TestCase
 from hashids import Hashids
 
@@ -25,7 +24,7 @@ class SerializerMixinTestCase(TestCase):
         self.owner_tyrell = models.Owner.objects.get()
         self.organization_ecorp = models.Organization.objects.get()
 
-    @cached_property
+    @property
     def expected_complete_data(self):
         """
         Return our expectation of the fully serialized model.

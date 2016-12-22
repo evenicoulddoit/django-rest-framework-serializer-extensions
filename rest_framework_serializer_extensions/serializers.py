@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 from collections import OrderedDict
 
-from cached_property import cached_property
+from django.utils import six
 from rest_framework import serializers
-import six
 
 from rest_framework_serializer_extensions import (
     fields as custom_fields, utils
@@ -506,7 +505,7 @@ class ExcludeFieldsMixin(object):
 
 
 class SerializerHelpersMixin(object):
-    @cached_property
+    @property
     def hierarchy(self):
         return _get_serializer_hierarchy(self)
 
