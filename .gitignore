@@ -4,6 +4,7 @@
 build
 dist
 html
+htmlcov
 coverage.xml
 *.pyc
 *.egg-info
