@@ -40,6 +40,41 @@ INSTALLED_APPS = (
 ```
 
 
+## Basic Usage
+To activate the serializer extensions, add the `SerializerExtensionsMixin` to your serializers:
+
+```py
+# serializers.py
+from rest_framework.serializers import ModelSerializer
+from rest_framework_serializer_extensions.serializers import SerializerExtensionsMixin
+
+...
+
+class OwnerSerializer(SerializerExtensionsMixin, ModelSerializer):
+    class Meta:
+        model = models.Owner
+        fields = ('id', 'name')
+        expandable_fields = dict(
+            organization=OrganizationSerializer,
+            cars=dict(
+                serializer=SkuSerializer,
+                many=True,
+                source='cars.all'
+            )
+        )
+```
+
+And add the `SerializerExtensionsAPIViewMixin` to your API views:
+
+```py
+from rest_framework.generics import RetrieveAPIView
+from rest_framework_serializer_extensions.views import SerializerExtensionsAPIViewMixin
+
+class RetriveOwnerAPIView(SerializerExtensionsAPIViewMixin, RetrieveAPIView):
+    ...
+```
+
+
 ## Examples
 Serializer extensions allows your API to re-use your serializers to fit a
 variety of use cases. The examples shown below use query parameters to
