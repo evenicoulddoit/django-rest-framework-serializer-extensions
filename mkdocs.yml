@@ -2,3 +2,15 @@ site_name: djangorestframework-serializer-extensions
 site_description: Extensions to DRY up Django Rest Framework serializers
 repo_url: https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions
 site_dir: html
+theme: readthedocs
+pages:
+  - Home: 'index.md'
+  - Overview: 'overview.md'
+  - Installation: 'installation.md'
+  - Usage:
+    - Serializers: 'usage-serializers.md'
+    - Views: 'usage-views.md'
+    - 'HashIds Support': 'usage-hashids.md'
+    - 'API Guide': 'usage-api.md'
+  - Examples: 'examples.md'
+  - Contributing: 'contributing.md'
