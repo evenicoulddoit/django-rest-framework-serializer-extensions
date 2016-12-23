@@ -1,6 +1,4 @@
-# API Guide
-
-## Settings
+# Settings
 All settings are defined within the `REST_FRAMEWORK.SERIALIZER_EXTENSIONS`
 subnamespace, e.g.:
 
@@ -27,7 +25,7 @@ The maximum depth that any serializer can be expanded to within your
 project (default: `3`).
 
 
-## Expandable field definition
+# Expandable field definition
 Each expandable field definition should consist of a dictionary, where the
 key represents the field name, and the value is a dictionary. The exception to
 this is simple ForeignKey relations, which can pass a single value representing
