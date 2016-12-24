@@ -1,6 +1,8 @@
 # Django REST framework serializer extensions
 **A collection of useful tools to DRY up your Django Rest Framework serializers**
 
+Full documentation: http://django-rest-framework-serializer-extensions.readthedocs.io/
+
 [![build-status-image]][travis]
 [![coverage-status-image]][codecov]
 [![pypi-version]][pypi]
@@ -13,7 +15,7 @@ be whitelisted, blacklisted, and child serializers can be optionally expanded.
 
 Support for [HashIds](https://github.com/davidaurelio/hashids-python) is
 also provided. If you're currently exposing your internal IDs over a public
-API, we suggest you consider switching to HashIDs instead.
+API, we suggest you consider switching to HashIds instead.
 
 
 ## Requirements
