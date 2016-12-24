@@ -1,7 +1,7 @@
 # The view mixin
-Just as with our serializers, to enable serializer extensions in our views,
-we'll need to apply a mixin - the `SerializerExtensionsAPIViewMixin` class.
-Your views will now look something like:
+Just as with our serializers, our API views require a mixin to support the
+extensions - the `SerializerExtensionsAPIViewMixin` class. Your views will now
+look something like:
 
 ```py
 from rest_framework.generics import RetrieveAPIView

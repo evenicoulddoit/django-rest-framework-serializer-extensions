@@ -3,6 +3,8 @@ site_description: Extensions to DRY up Django Rest Framework serializers
 repo_url: https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions
 site_dir: html
 theme: readthedocs
+extra_css:
+  - css/extra.css
 pages:
   - Home: 'index.md'
   - Overview: 'overview.md'

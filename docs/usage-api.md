@@ -1,6 +1,6 @@
 # Settings
 All settings are defined within the `REST_FRAMEWORK.SERIALIZER_EXTENSIONS`
-subnamespace, e.g.:
+sub-namespace, e.g.:
 
 ```py
 # settings.py

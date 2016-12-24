@@ -1,8 +1,18 @@
-.badges a {
+.index h1 {
+  margin-bottom: 5px;
+}
+
+.index__badges {
+  margin: 20px 0 30px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.index__badges a {
   display: inline-block;
 }
 
-.badges a img {
+.index__badges img {
   padding: 0;
   margin: 0;
 }

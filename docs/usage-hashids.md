@@ -6,7 +6,7 @@ number of entries (e.g. customers, orders etc.) in your database, and makes
 misuse of vulnerable endpoints a lot easier when a sequential key is used (e.g.
 `/customers/1/`). HashIds aim to solve both issues.
 
-To enable HashIds, add the following to your `REST_FRAMEWORK` setting:
+To enable HashIds, add the following to your `REST_FRAMEWORK` settings:
 
 ```py
 # settings.py

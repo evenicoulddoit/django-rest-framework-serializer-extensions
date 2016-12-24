@@ -23,6 +23,14 @@ class SkuTestSerializer(
         fields = ('id', 'variant')
 
 
+class OrganizationTestSerializer(
+    serializers.SerializerExtensionsMixin, ModelSerializer
+):
+    class Meta:
+        model = models.Organization
+        fields = ('id', 'name')
+
+
 class OwnerTestSerializer(
     serializers.SerializerExtensionsMixin, ModelSerializer
 ):
@@ -30,6 +38,7 @@ class OwnerTestSerializer(
         model = models.Owner
         fields = ('id', 'name')
         expandable_fields = dict(
+            organization=OrganizationTestSerializer,
             cars=dict(
                 serializer=SkuTestSerializer,
                 many=True,
@@ -211,6 +220,7 @@ class SerializerExtensionsAPIViewMixinTests(TestCase):
 
     def setUp(self):
         self.owner = models.Owner.objects.get()
+        self.organization = models.Organization.objects.get()
         self.sku_p100d = models.Sku.objects.get(variant='P100D')
 
     def get_response_data(self, **params):
@@ -227,7 +237,8 @@ class SerializerExtensionsAPIViewMixinTests(TestCase):
             data,
             dict(
                 id=self.owner.pk,
-                name=self.owner.name
+                name=self.owner.name,
+                organization_id=self.organization.pk
             )
         )
 
