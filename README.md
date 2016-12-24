@@ -15,7 +15,7 @@ be whitelisted, blacklisted, and child serializers can be optionally expanded.
 
 Support for [HashIds](https://github.com/davidaurelio/hashids-python) is
 also provided. If you're currently exposing your internal IDs over a public
-API, we suggest you consider switching to HashIDs instead.
+API, we suggest you consider switching to HashIds instead.
 
 
 ## Requirements
