@@ -1,9 +1,9 @@
 <div class="home-title">
   <h1>Django REST framework serializer extensions</h1>
-  <h2>
+  <strong>
     A collection of useful tools to DRY up your Django Rest Framework
     serializers
-  </h2>
+  </strong>
 </div>
 
 
@@ -17,6 +17,7 @@
   <a href="https://pypi.python.org/pypi/djangorestframework-serializer-extensions">
     <img src="https://img.shields.io/pypi/v/djangorestframework-serializer-extensions.svg">
   </a>
+  <br>
 </div>
 
 
