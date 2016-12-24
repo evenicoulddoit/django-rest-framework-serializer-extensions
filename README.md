@@ -1,5 +1,7 @@
 # Django REST framework serializer extensions
-**A collection of useful tools to DRY up your Django Rest Framework serializers**
+**A collection of useful tools to DRY up your Django Rest Framework serializers
+
+Full documentation: http://django-rest-framework-serializer-extensions.readthedocs.io/
 
 [![build-status-image]][travis]
 [![coverage-status-image]][codecov]
