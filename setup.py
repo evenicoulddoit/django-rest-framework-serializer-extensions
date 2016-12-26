@@ -49,6 +49,21 @@ def get_package_data(package):
     return {package: filepaths}
 
 
+def get_long_description():
+    """
+    Return the long package description by parsing the README markdown file.
+
+    If PyPandoc is available, convert the Markdown to reStructuredText,
+    as PyPI doesn't support Markdown.
+    """
+    try:
+        import pypandoc
+    except ImportError:
+        return open('README.md').read()
+    else:
+        return pypandoc.convert('README.md', 'rst')
+
+
 version = get_version(package)
 
 
@@ -70,6 +85,7 @@ setup(
     url=url,
     license=license,
     description=description,
+    long_description=get_long_description(),
     author=author,
     author_email=author_email,
     packages=get_packages(package),
