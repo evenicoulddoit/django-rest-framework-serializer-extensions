@@ -41,8 +41,7 @@ class CarModelTestSerializer(
             manufacturer=ManufacturerTestSerializer,
             skus=dict(
                 serializer='{0}.SkuTestSerializer'.format(MODULE),
-                many=True,
-                source='skus.all'
+                many=True
             )
         )
 
@@ -56,7 +55,6 @@ class SkuTestSerializer(ExpandableFieldsMixin, serializers.ModelSerializer):
             owners=dict(
                 serializer='{0}.OwnerTestSerializer'.format(MODULE),
                 many=True,
-                source='owners.all'
             )
         )
 
@@ -90,8 +88,7 @@ class OwnerTestSerializer(ExpandableFieldsMixin, serializers.ModelSerializer):
             organization='{0}.OrganizationTestSerializer'.format(MODULE),
             cars=dict(
                 serializer=SkuTestSerializer,
-                many=True,
-                source='cars.all'
+                many=True
             )
         )
 

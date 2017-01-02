@@ -60,8 +60,7 @@ class OwnerSerializer(SerializerExtensionsMixin, ModelSerializer):
             organization=OrganizationSerializer,
             cars=dict(
                 serializer=SkuSerializer,
-                many=True,
-                source='cars.all'
+                many=True
             )
         )
 ```

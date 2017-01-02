@@ -40,8 +40,7 @@ class FooSerializer(ExpandableFieldsMixin)
             bar=BarSerializer,
             zulu=dict(
                 serializer='zulu.serializers.ZuluSerializer',
-                many=True,
-                source='zulu.all'
+                many=True
             )
             foo_more=dict(
                 serializer'foo.serializers.FooMoreSerializer',

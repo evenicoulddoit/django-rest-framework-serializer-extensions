@@ -41,8 +41,7 @@ class OwnerTestSerializer(
             organization=OrganizationTestSerializer,
             cars=dict(
                 serializer=SkuTestSerializer,
-                many=True,
-                source='cars.all'
+                many=True
             )
         )
 
