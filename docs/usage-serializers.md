@@ -72,7 +72,7 @@ class OwnerSerializer(SerializerExtensionsMixin, ModelSerializer):
 ```
 
 Our one serializer now handles all 3 use cases. If we want to serialize an
-along with their organization, their cars, or both, we can do so.
+owner along with their organization, their cars, or both, we can do so.
 
 
 ## Single child expansion
