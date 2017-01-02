@@ -483,6 +483,36 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             )
         )
 
+    def test_custom_source_id_only_field(self):
+        """
+        A custom source can be used for id_only field expansion.
+
+        A SerializerMethodField is passed with the object as it's source.
+        """
+        class CustomIdSourceSerializer(OwnerTestSerializer):
+            class Meta(OwnerTestSerializer.Meta):
+                expandable_fields = dict(
+                    car_skus=dict(
+                        serializer=SkuTestSerializer,
+                        many=True,
+                        source='cars'
+                    )
+                )
+
+        serialized = CustomIdSourceSerializer(
+            self.owner_tyrell,
+            context=dict(expand_id_only={'car_skus'})
+        ).data
+
+        self.assertDictEqual(
+            serialized,
+            dict(
+                id=self.owner_tyrell.pk,
+                name=self.owner_tyrell.name,
+                car_skus=[self.expand_instance_id(self.sku_p100d)]
+            )
+        )
+
     def test_nested_id_only_expansion(self):
         """
         Nested ID expansion implies full expansion until the last node.
