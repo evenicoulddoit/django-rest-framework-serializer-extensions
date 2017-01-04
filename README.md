@@ -18,12 +18,6 @@ also provided. If you're currently exposing your internal IDs over a public
 API, we suggest you consider switching to HashIds instead.
 
 **:star: Kindly open-sourced by [Housekeep](https://housekeep.com).**
-<div>
-  <a href="https://housekeep.com" target="_blank">
-    <img src="https://d17x34b9fcvxk7.cloudfront.net/static/img/logo.png"
-         width="206" height="40">
-  </a>
-</div>
 
 ## Requirements
 * Python (2.7, 3.4, 3.5)
