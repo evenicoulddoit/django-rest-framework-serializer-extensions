@@ -17,7 +17,7 @@ Support for [HashIds](https://github.com/davidaurelio/hashids-python) is
 also provided. If you're currently exposing your internal IDs over a public
 API, we suggest you consider switching to HashIds instead.
 
-**:star: Kindly open-sourced by [Housekeep](https://housekeep.com).**
+**:star: Lovingly open-sourced by [Housekeep](https://housekeep.com).**
 
 ## Requirements
 * Python (2.7, 3.4, 3.5)
