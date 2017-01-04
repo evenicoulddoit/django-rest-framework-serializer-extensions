@@ -17,10 +17,12 @@ Support for [HashIds](https://github.com/davidaurelio/hashids-python) is
 also provided. If you're currently exposing your internal IDs over a public
 API, we suggest you consider switching to HashIds instead.
 
-**Kindly open-sourced by [Housekeep](https://housekeep.com).**
+**:star: Kindly open-sourced by [Housekeep](https://housekeep.com).**
 <div>
-  <img src="https://d17x34b9fcvxk7.cloudfront.net/static/img/logo.png"
-       width="206" height="40">
+  <a href="https://housekeep.com" target="_blank">
+    <img src="https://d17x34b9fcvxk7.cloudfront.net/static/img/logo.png"
+         width="206" height="40">
+  </a>
 </div>
 
 ## Requirements
