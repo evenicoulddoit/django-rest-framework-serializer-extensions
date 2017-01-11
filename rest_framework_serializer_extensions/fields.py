@@ -71,7 +71,7 @@ class HashIdField(GetHashIdModelMixin, Field):
 
 
 class HashedHyperlinkMixin(GetHashIdModelMixin):
-    def get_url(self, obj, view_name, request, format):
+    def get_url(self, obj, view_name, request, fmt):
         """
         Use the field source in combination with the model to generate the URL.
         """
@@ -85,7 +85,7 @@ class HashedHyperlinkMixin(GetHashIdModelMixin):
         )
         kwargs = {self.lookup_url_kwarg: external_id}
         return self.reverse(
-            view_name, kwargs=kwargs, request=request, format=format
+            view_name, kwargs=kwargs, request=request, format=fmt
         )
 
 
