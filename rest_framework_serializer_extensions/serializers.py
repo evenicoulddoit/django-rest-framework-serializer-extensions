@@ -431,17 +431,19 @@ class ExpandableFieldsMixin(object):
 
     def run_validation(self, data=empty):
         """
-        After validation, convert writable <fieldname>_id fields to <fieldname>
+        Add <fieldname>_id_resolved for all writable <fieldname>_id fields.
         """
         validated_data = (
             super(ExpandableFieldsMixin, self).run_validation(data=data)
         )
         for id_field_name in self._id_fields_to_translate:
             if id_field_name in validated_data:
-                model_field_name = id_field_name[:-3]
-                validated_data[model_field_name] = (
-                    validated_data.pop(id_field_name)
-                )
+                # ID field has been resolved to an instance
+                instance = validated_data[id_field_name]
+                resolved_field_name = '{0}_resolved'.format(id_field_name)
+                validated_data[resolved_field_name] = instance
+                validated_data[id_field_name] = instance.pk
+
         return validated_data
 
 

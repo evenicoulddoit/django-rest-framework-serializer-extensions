@@ -138,6 +138,20 @@ class OwnerWithCustomIdSourceTestSerializer(
         )
 
 
+class CarModelWithWritableManufacturerTestSerializer(
+    ExpandableFieldsMixin, serializers.ModelSerializer
+):
+    class Meta:
+        fields = ('id', 'name')
+        model = models.CarModel
+        expandable_fields = dict(
+            manufacturer=dict(
+                serializer=ManufacturerTestSerializer,
+                read_only=False
+            ),
+        )
+
+
 """
 END TEST SERIALIZERS
 """
@@ -673,6 +687,60 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 )
             )
         )
+
+    def test_deserialize_read_only_id_field(self):
+        """
+        ID field for expandable field is not writable by default
+        """
+        serializer = CarModelTestSerializer(
+            data=dict(
+                name='Ka',
+                manufacturer_id=(
+                    self.expand_instance_id(self.manufacturer_tesla)
+                )
+            )
+        )
+        self.assertTrue(serializer.is_valid())
+        self.assertEquals(dict(name='Ka'), serializer.validated_data)
+
+    def test_deserialize_writable_field(self):
+        """
+        If expandable relation is writable, values for ID resolved to instances
+        """
+        serializer = CarModelWithWritableManufacturerTestSerializer(
+            data=dict(
+                name='Ka',
+                manufacturer_id=(
+                    self.expand_instance_id(self.manufacturer_tesla)
+                )
+            )
+        )
+        self.assertTrue(serializer.is_valid())
+        self.assertEquals(
+            dict(
+                name='Ka',
+                manufacturer_id=self.manufacturer_tesla.pk,
+                manufacturer_id_resolved=self.manufacturer_tesla,
+            ),
+            serializer.validated_data
+        )
+
+    def test_writable_field_required(self):
+        """
+        If a field is writable, it can be required when deserializing.
+        """
+        serializer = CarModelWithWritableManufacturerTestSerializer(
+            data=dict(name='Ka')
+        )
+        self.assertFalse(serializer.is_valid())
+        self.assertTrue('manufacturer_id' in serializer.errors)
+
+    def test_read_only_field_not_required(self):
+        """
+        If a field is read only, it is not required when deserializing.
+        """
+        serializer = CarModelTestSerializer(data=dict(name='Ka'))
+        self.assertTrue(serializer.is_valid())
 
 
 @override_settings(
