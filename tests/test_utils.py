@@ -151,3 +151,32 @@ class InternalIdFromModelAndExternalIdTests(TestCase):
                 models.Organization, external_id_b
             )
         )
+
+
+class ModelFromDefinitionTests(TestCase):
+    """
+    Unit tests for the model_from_definition() utility method.
+    """
+    def test_pass_non_model_class_raises_assertion_error(self):
+        """
+        An error should be raised when a non-Django model class is passed.
+        """
+        with self.assertRaisesRegexp(AssertionError, 'not a Django model'):
+            utils.model_from_definition(dict)
+
+    def test_pass_model_class_as_model_definition(self):
+        """
+        Passing string corresponding to model should import and return model.
+        """
+        self.assertEquals(
+            models.CarModel,
+            utils.model_from_definition('tests.models.CarModel')
+        )
+
+    def test_pass_model_class_as_model_definition(self):
+        """
+        Test that the method returns its argument when Django model is passed.
+        """
+        self.assertEquals(
+            models.CarModel, utils.model_from_definition(models.CarModel)
+        )
