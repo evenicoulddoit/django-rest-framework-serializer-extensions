@@ -1,4 +1,4 @@
-from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import six
 from rest_framework.fields import Field
 from rest_framework.relations import (
@@ -52,7 +52,6 @@ class HashIdField(GetHashIdModelMixin, Field):
     """
     default_error_messages = {
         'malformed_hash_id': 'That is not a valid HashId',
-        'nonexistent_content_type': 'ContentType does not exist',
     }
 
     def to_representation(self, value):
@@ -64,9 +63,7 @@ class HashIdField(GetHashIdModelMixin, Field):
         model = self.get_model()
         try:
             return utils.internal_id_from_model_and_external_id(model, value)
-        except ContentType.DoesNotExist:
-            self.fail('nonexistent_content_type')
-        except model.DoesNotExist:
+        except ObjectDoesNotExist:
             self.fail('malformed_hash_id')
 
 
