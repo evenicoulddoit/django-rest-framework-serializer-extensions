@@ -164,7 +164,7 @@ class ModelFromDefinitionTests(TestCase):
         with self.assertRaisesRegexp(AssertionError, 'not a Django model'):
             utils.model_from_definition(dict)
 
-    def test_pass_model_class_as_model_definition(self):
+    def test_pass_string_as_model_definition(self):
         """
         Passing string corresponding to model should import and return model.
         """
