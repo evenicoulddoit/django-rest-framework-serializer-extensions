@@ -215,6 +215,10 @@ class ExpandableFieldsMixin(object):
         if 'id_model' not in definition:
             definition['id_model'] = definition['serializer'].Meta.model
 
+        # read_only defaults to True
+        if 'read_only' not in definition:
+            definition['read_only'] = True
+
         return definition
 
     def _parse_root_instructions(self):
@@ -292,8 +296,7 @@ class ExpandableFieldsMixin(object):
         if hasattr(self, 'get_{0}_id'.format(field_name)):
             return serializers.SerializerMethodField(source='*')
 
-        read_only = field_definition.get('read_only', True)
-        kwargs = dict(read_only=read_only)
+        kwargs = dict(read_only=field_definition['read_only'])
 
         if 'id_source' in field_definition:
             kwargs.update(source=field_definition['id_source'])
@@ -305,7 +308,7 @@ class ExpandableFieldsMixin(object):
 
         # If the field is to be writable, PrimaryKeyRelatedField needs a
         # queryset from which to find instances
-        if not read_only:
+        if not field_definition['read_only']:
             kwargs['queryset'] = (
                 utils.model_from_definition(field_definition['id_model'])
                 .objects.all()
@@ -432,6 +435,9 @@ class ExpandableFieldsMixin(object):
     def run_validation(self, data=empty):
         """
         Add <fieldname>_id_resolved for all writable <fieldname>_id fields.
+
+        After running, <fieldname>_id fields should contain IDs, while
+        <fieldname>_id_resolved fields should contain resolved instances.
         """
         validated_data = (
             super(ExpandableFieldsMixin, self).run_validation(data=data)
@@ -440,8 +446,12 @@ class ExpandableFieldsMixin(object):
             if id_field_name in validated_data:
                 # ID field has been resolved to an instance
                 instance = validated_data[id_field_name]
+
+                # Create a new field to contain the resolved instance.
                 resolved_field_name = '{0}_resolved'.format(id_field_name)
                 validated_data[resolved_field_name] = instance
+
+                # Translate ID field contents back to an ID
                 validated_data[id_field_name] = instance.pk
 
         return validated_data
