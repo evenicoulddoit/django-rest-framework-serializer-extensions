@@ -159,8 +159,12 @@ class OwnerSerializer(SerializerExtensionsMixin, ModelSerializer):
 As usual, the above serializer will have an `organization_id` field by default.
 To set or alter the organization of an owner, pass a value to this field:
 
-```py
-serializer = OwnerSerializer(data=dict(name="Elliot", organization_id=2))
+```js
+>>> POST /owner/2/
+{
+  "name": "Elliot",
+  "organization_id": 3
+}
 ```
 
 It is important to note that we are passing an organization's ID to the
