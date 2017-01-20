@@ -137,6 +137,53 @@ class OwnerSerializer(SerializerExtensionsMixin, ModelSerializer):
 Setting `id_source=False` results in no ID field being included.
 
 
+### Writable ForeignKey relationships
+In some cases it may be appropriate to allow ForeignKey fields to be set during
+a create or an update via your API. To create a ForeignKey relation that is
+both expandable and writable, set `read_only=False` in its definition.
+
+```py
+# serializers.py
+class OwnerSerializer(SerializerExtensionsMixin, ModelSerializer):
+    class Meta:
+        model = models.Owner
+        fields = ('id', 'name')
+        expandable_fields = dict(
+            organization=dict(
+                serializer=OrganizationSerializer,
+                read_only=False
+            )
+        )
+```
+
+As usual, the above serializer will have an `organization_id` field by default.
+To set or alter the organization of an owner, pass a value to this field:
+
+```js
+>>> POST /owner/2/
+{
+  "name": "Elliot",
+  "organization_id": 3
+}
+```
+
+It is important to note that we are passing an organization's ID to the
+`organization_id` field, not a dictionary of properties to the `organization`
+field.
+
+During validation the serializer will find the corresponding organization and
+add make it available in the deserialized data under the key
+`organization_id_resolved`:
+
+```py
+{
+    "name": "Elliot",
+    "organization_id": 2,
+    "organization_id_resolved": <Organization: Allsafe>
+}
+```
+
+
 ### Non-Model relations
 Any child serializer can be expanded, not just Django model relations.
 A common use case for expanding fields is to avoid serializing unnecessary,

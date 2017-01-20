@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.core.urlresolvers import reverse
 from django.test import override_settings, RequestFactory, TestCase
+from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import Serializer, ModelSerializer
 
 from rest_framework_serializer_extensions import fields, utils
@@ -136,6 +137,13 @@ class HashIdFieldTests(BaseFieldsTestCase):
             (
                 fields.HashIdField(model='tests.base.TEST_HASH_IDS')
                 .to_internal_value(self.external_id(self.car_model))
+            )
+
+    def test_internal_value_hash_id_validation(self):
+        with self.assertRaisesRegexp(ValidationError, 'not a valid HashId'):
+            (
+                fields.HashIdField(model='tests.models.CarModel')
+                .to_internal_value('abc123')
             )
 
     def test_internal_value_implicit_model_reference_through_meta(self):

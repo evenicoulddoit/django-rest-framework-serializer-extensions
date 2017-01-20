@@ -1,4 +1,4 @@
-from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import six
 from rest_framework.fields import Field
 from rest_framework.relations import (
@@ -38,16 +38,7 @@ class GetHashIdModelMixin(object):
                         .format(type(self).__name__)
                     )
         elif isinstance(self.model, six.string_types):
-            obj = utils.import_local(self.model)
-
-            try:
-                assert issubclass(obj, models.Model)
-            except (AssertionError, TypeError):
-                raise AssertionError(
-                    '"{0}"" is not a Django model'.format(self.model)
-                )
-
-            return obj
+            return utils.model_from_definition(self.model)
         else:
             return self.model
 
@@ -59,15 +50,21 @@ class HashIdField(GetHashIdModelMixin, Field):
     Requires the source of the field to be an internal ID, and to provide
     a "model" keyword argument. Together these will produce the external ID.
     """
+    default_error_messages = {
+        'malformed_hash_id': 'That is not a valid HashId',
+    }
+
     def to_representation(self, value):
         return utils.external_id_from_model_and_internal_id(
             self.get_model(), value
         )
 
     def to_internal_value(self, value):
-        return utils.internal_id_from_model_and_external_id(
-            self.get_model(), value
-        )
+        model = self.get_model()
+        try:
+            return utils.internal_id_from_model_and_external_id(model, value)
+        except ObjectDoesNotExist:
+            self.fail('malformed_hash_id')
 
 
 class HashedHyperlinkMixin(GetHashIdModelMixin):

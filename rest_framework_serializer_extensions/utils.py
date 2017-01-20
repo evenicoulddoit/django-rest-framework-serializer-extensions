@@ -2,6 +2,8 @@ import importlib
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
+from django.utils import six
 
 
 def import_local(path_to_object):
@@ -71,3 +73,31 @@ def internal_id_from_model_and_external_id(model, external_id):
         raise model.DoesNotExist
 
     return instance_id
+
+
+def model_from_definition(model_definition):
+    """
+    Return a Django model corresponding to model_definition.
+
+    Model definition can either be a string defining how to import the model,
+    or a model class.
+
+    Arguments:
+        model_definition: (str|django.db.models.Model)
+
+    Returns:
+        (django.db.models.Model)
+    """
+    if isinstance(model_definition, six.string_types):
+        model = import_local(model_definition)
+    else:
+        model = model_definition
+
+    try:
+        assert issubclass(model, models.Model)
+    except (AssertionError, TypeError):
+        raise AssertionError(
+            '"{0}"" is not a Django model'.format(model_definition)
+        )
+
+    return model

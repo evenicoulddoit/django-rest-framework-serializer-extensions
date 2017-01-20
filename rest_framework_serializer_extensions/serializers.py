@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 from django.utils import six
 from rest_framework import serializers
+from rest_framework.fields import empty
 
 from rest_framework_serializer_extensions import (
     fields as custom_fields, utils
@@ -116,6 +117,9 @@ class ExpandableFieldsMixin(object):
             * id_model (Optional[Model]):
                 The model, which is combined with an ID to generate a HashId.
                 Defaults to the model within the Meta of the child serializer.
+            * read_only (Optional[Boolean]):
+                For Foreign relations, whether the field can be written.
+                Defaults to False.
 
     Example:
 
@@ -211,6 +215,10 @@ class ExpandableFieldsMixin(object):
         if 'id_model' not in definition:
             definition['id_model'] = definition['serializer'].Meta.model
 
+        # read_only defaults to True
+        if 'read_only' not in definition:
+            definition['read_only'] = True
+
         return definition
 
     def _parse_root_instructions(self):
@@ -288,7 +296,7 @@ class ExpandableFieldsMixin(object):
         if hasattr(self, 'get_{0}_id'.format(field_name)):
             return serializers.SerializerMethodField(source='*')
 
-        kwargs = dict(read_only=True)
+        kwargs = dict(read_only=field_definition['read_only'])
 
         if 'id_source' in field_definition:
             kwargs.update(source=field_definition['id_source'])
@@ -297,6 +305,14 @@ class ExpandableFieldsMixin(object):
             kwargs.update(pk_field=(
                 custom_fields.HashIdField(model=field_definition['id_model'])
             ))
+
+        # If the field is to be writable, PrimaryKeyRelatedField needs a
+        # queryset from which to find instances
+        if not field_definition['read_only']:
+            kwargs['queryset'] = (
+                utils.model_from_definition(field_definition['id_model'])
+                .objects.all()
+            )
 
         return serializers.PrimaryKeyRelatedField(**kwargs)
 
@@ -377,6 +393,10 @@ class ExpandableFieldsMixin(object):
 
         field_iterator = six.iteritems(self.expandable_fields)
 
+        # As we add <fieldname>_id fields for foreign keys, take note of any
+        # that require translation to model instances in the case of an update
+        self._id_fields_to_translate = []
+
         # Expand fields according to their definition and instructions
         for field_name, field_definition in field_iterator:
             # Always provide an ID reference for ForeignKeys
@@ -384,9 +404,12 @@ class ExpandableFieldsMixin(object):
                 not field_definition.get('many') and
                 field_definition.get('id_source') is not False
             ):
-                expanded_fields['{0}_id'.format(field_name)] = (
+                id_field_name = '{0}_id'.format(field_name)
+                expanded_fields[id_field_name] = (
                     self.get_expand_id_field(field_name, field_definition)
                 )
+                if not field_definition.get('read_only'):
+                    self._id_fields_to_translate.append(id_field_name)
 
             # Serialize the full instance(s) if required
             if field_name in instructions['full']:
@@ -408,6 +431,30 @@ class ExpandableFieldsMixin(object):
                 )
 
         return expanded_fields
+
+    def run_validation(self, data=empty):
+        """
+        Add <fieldname>_id_resolved for all writable <fieldname>_id fields.
+
+        After running, <fieldname>_id fields should contain IDs, while
+        <fieldname>_id_resolved fields should contain resolved instances.
+        """
+        validated_data = (
+            super(ExpandableFieldsMixin, self).run_validation(data=data)
+        )
+        for id_field_name in self._id_fields_to_translate:
+            if id_field_name in validated_data:
+                # ID field has been resolved to an instance
+                instance = validated_data[id_field_name]
+
+                # Create a new field to contain the resolved instance.
+                resolved_field_name = '{0}_resolved'.format(id_field_name)
+                validated_data[resolved_field_name] = instance
+
+                # Translate ID field contents back to an ID
+                validated_data[id_field_name] = instance.pk
+
+        return validated_data
 
 
 class OnlyFieldsMixin(object):
