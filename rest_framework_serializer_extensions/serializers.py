@@ -212,7 +212,10 @@ class ExpandableFieldsMixin(object):
             return definition
 
         # The model used for the HashId (defaults to the serializer's model)
-        if 'id_model' not in definition:
+        if (
+            definition.get('id_source') is not False and
+            'id_model' not in definition
+        ):
             definition['id_model'] = definition['serializer'].Meta.model
 
         # read_only defaults to True
