@@ -152,6 +152,29 @@ class CarModelWithWritableManufacturerTestSerializer(
         )
 
 
+class NonModelTestSerializer(ExpandableFieldsMixin, serializers.Serializer):
+    is_model = serializers.SerializerMethodField()
+
+    def get_is_model(self, obj):
+        return False
+
+    def get_sku(self, obj):
+        sku = models.Sku.objects.get(variant='P100D')
+        serializer = SkuTestSerializer(instance=sku, context=self.context)
+        serializer.bind('sku', self)
+        return serializer.data
+
+    class Meta:
+        expandable_fields = dict(
+            non_model=dict(
+                serializer='{0}.NonModelTestSerializer'.format(MODULE),
+                source='*',
+                id_source=False
+            ),
+            sku=serializers.SerializerMethodField
+        )
+
+
 """
 END TEST SERIALIZERS
 """
@@ -741,6 +764,49 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         """
         serializer = CarModelTestSerializer(data=dict(name='Ka'))
         self.assertTrue(serializer.is_valid())
+
+    def test_unexpanded_non_model_serializer(self):
+        """
+        Non-model serializers should support the mixin.
+        """
+        serializer = NonModelTestSerializer({})
+        self.assertDictEqual(serializer.data, dict(is_model=False))
+
+    def test_expanded_non_model_serializer_with_non_model_serializer(self):
+        """
+        Non-model to non-model expansion should work as expected.
+        """
+        serializer = NonModelTestSerializer(
+            {}, context=dict(expand={'non_model'})
+        )
+        self.assertDictEqual(
+            serializer.data,
+            dict(
+                is_model=False,
+                non_model=dict(
+                    is_model=False
+                )
+            )
+        )
+
+    def test_expanded_non_model_serializer_with_model_serializer(self):
+        """
+        Non-model to model expansion should work as expected.
+        """
+        serializer = NonModelTestSerializer(
+            {}, context=dict(expand={'sku'})
+        )
+        self.assertDictEqual(
+            serializer.data,
+            dict(
+                is_model=False,
+                sku=dict(
+                    id=self.sku_p100d.pk,
+                    variant=self.sku_p100d.variant,
+                    model_id=self.expand_instance_id(self.carmodel_model_s)
+                )
+            )
+        )
 
 
 @override_settings(
