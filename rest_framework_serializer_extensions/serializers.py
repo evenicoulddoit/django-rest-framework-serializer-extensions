@@ -1,6 +1,11 @@
 from __future__ import absolute_import
 from collections import OrderedDict
+from pprint import pformat
 
+from django.core.exceptions import FieldDoesNotExist
+from django.db.models import Prefetch
+from django.db.models.fields.related import ForeignKey
+from django.db.models.query import QuerySet
 from django.utils import six
 from rest_framework import serializers
 from rest_framework.fields import empty
@@ -10,7 +15,9 @@ from rest_framework_serializer_extensions import (
 )
 
 
-NESTED_DELIMITER = '__'
+SOURCE_DELIMITER = '.'
+QUERYSET_DELIMITER = '__'
+EXPAND_DELIMITER = '__'
 DEFAULT_MAX_EXPAND_DEPTH = 3
 
 
@@ -72,7 +79,7 @@ def _get_nested_field_names(hierarchy, root_field_names):
         if name == hierarchy:
             matching.add('*')
         elif hierarchy:
-            prefix = '{0}{1}'.format(hierarchy, NESTED_DELIMITER)
+            prefix = '{0}{1}'.format(hierarchy, EXPAND_DELIMITER)
 
             if name.startswith(prefix):
                 matching.add(name[len(prefix):])
@@ -86,6 +93,135 @@ def _field_names_list(field_names):
     return ', '.join(
         '"{0}"'.format(field_name) for field_name in field_names
     )
+
+
+class RelatedMatcher(object):
+    """
+    Represent a hierarchical relationship of related expandable fields.
+
+    Each matcher has a related name, as well as a list of select and
+    prefetchable matches. This relationship can be used to optimize a queryset.
+    """
+    def __init__(self, field, related_name='', parent=None):
+        self.field = field
+        self.related_name = related_name
+        self.parent = parent
+        self.child_selects = []
+        self.child_prefetches = []
+
+    @property
+    def nested_related_name(self):
+        """
+        Return the combined related name for this matcher and it's parents.
+        """
+        try:
+            parent_nested_name = self.parent.nested_related_name
+        except AttributeError:
+            parent_nested_name = ''
+
+        if parent_nested_name:
+            return "{}{}{}".format(
+                parent_nested_name, QUERYSET_DELIMITER, self.related_name
+            )
+        else:
+            return self.related_name
+
+    def to_select_related(self, field, related_name):
+        """
+        Mark the given field and related name as being to select.
+
+        If the field is expandable, attempt to resolve it's matchers too.
+        """
+        child_matcher = RelatedMatcher(field, related_name, parent=self)
+        self.child_selects.append(child_matcher)
+
+        if hasattr(field, '_construct_relations'):
+            field._construct_relations(child_matcher)
+
+    def to_prefetch_related(self, field, related_name):
+        """
+        Mark the given field and related name as being to prefetch.
+
+        If the field is expandable, attempt to resolve it's matchers too.
+        """
+        child_matcher = RelatedMatcher(field, related_name, parent=self)
+        self.child_prefetches.append(child_matcher)
+
+        if hasattr(field, '_construct_relations'):
+            field._construct_relations(child_matcher)
+
+    def optimize_queryset(self, qs, as_prefetch=False):
+        """
+        Return the given queryset optimised with select/prefetch related calls.
+
+        Invoked recursively through the hierarchy of child matchers.
+
+        Arguments:
+            qs (QuerySet) - The Django Queryset to optimize
+            as_prefetch (Optional[bool])
+                Whether we're optimizing a nested Prefetch() queryset or not.
+
+        Returns:
+            (QuerySet)
+        """
+        for select_matcher in self.child_selects:
+            qs = qs.select_related(
+                self._matcher_lookup(select_matcher, as_prefetch)
+            )
+            qs = select_matcher.optimize_queryset(qs)
+
+        for prefetch_matcher in self.child_prefetches:
+            prefetched_qs = prefetch_matcher.optimize_queryset(
+                prefetch_matcher._get_model().objects.all(),
+                as_prefetch=True
+            )
+            qs = qs.prefetch_related(
+                Prefetch(
+                    self._matcher_lookup(prefetch_matcher, as_prefetch),
+                    queryset=prefetched_qs
+                )
+            )
+
+        return qs
+
+    def _get_model(self):
+        """
+        Return the model class for the given field.
+
+        For non-model serializers, we find the class by using the parent
+        serializer's model and the explictly provided related name.
+        """
+        try:
+            return self.field.Meta.model
+        except AttributeError:
+            parent_model = self.parent._get_model()
+            model_field = parent_model._meta.get_field(self.related_name)
+            return model_field.related_model
+
+    def _matcher_lookup(self, select_matcher, as_prefetch):
+        """
+        Return the lookup name to use as part of a select/prefetch call.
+
+        Except for when being used as part of a nested Prefetch() call, we
+        append the parent's lookups onto the given matcher's related name.
+        """
+        if as_prefetch:
+            return select_matcher.related_name
+        else:
+            return select_matcher.nested_related_name
+
+    def _as_dict(self):  # pragma: no cover
+        return dict(
+            name=(self.related_name or 'root'),
+            select_relateds=[s._as_dict() for s in self.child_selects],
+            prefetch_relateds=[p._as_dict() for p in self.child_prefetches]
+        )
+
+    def __repr__(self):
+        return "{cls}({details})".format(
+            cls=type(self).__name__,
+            details=pformat(self._as_dict())
+        )
 
 
 class ExpandableFieldsMixin(object):
@@ -184,6 +320,99 @@ class ExpandableFieldsMixin(object):
         fields.update(self._get_expand_fields(fields))
         return fields
 
+    def auto_optimize(self, qs):
+        """
+        Optimize the queryset based on the fields to expand.
+        """
+        root_matcher = RelatedMatcher(self)
+        self._construct_relations(root_matcher)
+        return root_matcher.optimize_queryset(qs)
+
+    def _construct_relations(self, matcher):
+        """
+        Construct a hierarchy of select/prefetch relations.
+
+        Recursively called on all the serializer's expandable fields.
+        """
+        expand_fields = self._get_expand_fields()
+
+        for field_name, field in six.iteritems(expand_fields):
+            if field_name.endswith('_id'):
+                field_definition = self.expandable_fields[field_name[:-3]]
+            else:
+                field_definition = self.expandable_fields[field_name]
+
+            # Allow fields to provide explicit optimizations
+            if not field_definition.get('auto_optimize', True):
+                continue
+
+            manual_select_related = field_definition.get('select_related')
+            manual_prefetch_related = field_definition.get('prefetch_related')
+
+            if manual_select_related:
+                for related_name in manual_select_related:
+                    matcher.to_select_related(field, related_name)
+                continue
+
+            if manual_prefetch_related:
+                for related_name in manual_prefetch_related:
+                    matcher.to_prefetch_related(field, related_name)
+                continue
+
+            # Provide automatic optimization for ModelSerializers
+            field.bind(field_name, self)
+            related_name = self._get_related_name(field)
+
+            if not related_name:
+                continue
+
+            # Retrieve prefetch related calls for lists
+            if getattr(field, 'many', False):
+                matcher.to_prefetch_related(field.child, related_name)
+            # Retrieve select related calls for individual instance
+            else:
+                matcher.to_select_related(field, related_name)
+
+    def _get_related_name(self, field):
+        """
+        Return a related lookup string from the given field's source.
+
+        Arguments:
+            field (rest_framework.fields.Field)
+
+        Example:
+            >>> field = ManufacturerSerializer(source='model.manufacturer')
+            >>> _get_related_name(field)
+            'model__manufacturer'
+
+        Returns:
+            (None|str)
+                To be used in a select_related() call to get this field.
+        """
+        related_parts = []
+        model = self.Meta.model
+
+        for related_part in field.source.split(SOURCE_DELIMITER):
+            try:
+                model_field = model._meta.get_field(related_part)
+            except FieldDoesNotExist:
+                break
+
+            model = model_field.related_model
+
+            # Ignore concrete ID-only references
+            is_id_only_concrete_fk = (
+                related_part.endswith('_id') and
+                isinstance(model_field, ForeignKey)
+            )
+
+            if model is None or is_id_only_concrete_fk:
+                break
+            else:
+                related_parts.append(related_part)
+
+        return QUERYSET_DELIMITER.join(related_parts)
+
     def _standardise_expandable_definitions(self, expandable_fields):
         return {
             key: self._standardise_expandable_definition(definition)
@@ -230,10 +459,10 @@ class ExpandableFieldsMixin(object):
 
         # ID-only fields implicitly require full expansion of their parents
         for nested_field_name in expand_id_only:
-            if NESTED_DELIMITER in nested_field_name:
+            if EXPAND_DELIMITER in nested_field_name:
                 expand_full.add(
-                    NESTED_DELIMITER.join(
-                        nested_field_name.split(NESTED_DELIMITER)[:-1]
+                    EXPAND_DELIMITER.join(
+                        nested_field_name.split(EXPAND_DELIMITER)[:-1]
                     )
                 )
 
@@ -244,7 +473,7 @@ class ExpandableFieldsMixin(object):
 
         for nested_field_names in six.itervalues(root_instructions):
             for nested_field_name in nested_field_names:
-                depth = len(nested_field_name.split(NESTED_DELIMITER))
+                depth = len(nested_field_name.split(EXPAND_DELIMITER))
 
                 if depth > max_depth:
                     raise ValueError(
@@ -273,7 +502,7 @@ class ExpandableFieldsMixin(object):
 
         for method, root_nested_names in six.iteritems(root_instructions):
             instructions[method] = {
-                n.split(NESTED_DELIMITER)[0]
+                n.split(EXPAND_DELIMITER)[0]
                 for n in _get_nested_field_names(hierarchy, root_nested_names)
                 if n != '*'
             }
@@ -381,7 +610,7 @@ class ExpandableFieldsMixin(object):
                     )
                 )
 
-    def _get_expand_fields(self, standard_fields):
+    def _get_expand_fields(self, standard_fields=None):
         """
         Return a collection of expand fields which match the instructions.
         """
@@ -392,7 +621,9 @@ class ExpandableFieldsMixin(object):
 
         expanded_fields = OrderedDict()
         instructions = self._expand_instructions(root_instructions)
-        self._validate_instructions(instructions, standard_fields)
+
+        if standard_fields:
+            self._validate_instructions(instructions, standard_fields)
 
         field_iterator = six.iteritems(self.expandable_fields)
 
@@ -480,7 +711,7 @@ class OnlyFieldsMixin(object):
 
         # Flatten the nested names to return a list of field names at the
         # current hierarchy to whitelist
-        only_names = {n.split(NESTED_DELIMITER)[0] for n in only_nested_names}
+        only_names = {n.split(EXPAND_DELIMITER)[0] for n in only_nested_names}
 
         # Include all fields if either explicitly told to, or no fields were
         # matched (which can only occur if a parent had been whitelisted).
@@ -533,7 +764,7 @@ class ExcludeFieldsMixin(object):
 
         # Only exclude a field if it exactly matching the current hierarchy
         exclude_names = {
-            n for n in exclude_nested_names if NESTED_DELIMITER not in n
+            n for n in exclude_nested_names if EXPAND_DELIMITER not in n
         }
 
         unmatched_names = exclude_names.difference(set(fields))
@@ -565,11 +796,19 @@ class SerializerHelpersMixin(object):
         The child serializer is invoked with the same context as the parent,
         and is bound to the parent.
         """
+        if (
+            isinstance(instance, QuerySet) and
+            self.context.get('auto_optimize')
+        ):
+            serializer_instance = serializer(context=self.context)
+            serializer_instance.bind(name, self)
+            instance = serializer_instance.auto_optimize(instance)
+
         serializer_kwargs = dict(instance=instance, context=self.context)
         serializer_kwargs.update(kwargs)
-        serializer = serializer(**serializer_kwargs)
-        serializer.bind(name, self)
-        return serializer.data
+        serializer_instance = serializer(**serializer_kwargs)
+        serializer_instance.bind(name, self)
+        return serializer_instance.data
 
 
 class SerializerExtensionsMixin(
