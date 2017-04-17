@@ -587,3 +587,15 @@ class SerializerExtensionsMixin(
     Blacklisting and whitelisting takes precedence over expanding, and can
     be used in combination with one another.
     """
+
+
+class ExtensionsSerializer(
+    SerializerExtensionsMixin, serializers.Serializer
+):
+    pass
+
+
+class ExtensionsModelSerializer(
+    SerializerExtensionsMixin, serializers.ModelSerializer
+):
+    pass
