@@ -12,6 +12,7 @@ pages:
   - User Guide:
     - Serializers: 'usage-serializers.md'
     - Views: 'usage-views.md'
+    - 'Automatic QuerySet optimization': 'auto-optimizations.md'
     - 'HashIds Support': 'usage-hashids.md'
     - 'API Reference': 'usage-api.md'
   - Examples: 'examples.md'

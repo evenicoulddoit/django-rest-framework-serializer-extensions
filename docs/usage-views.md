@@ -84,3 +84,15 @@ class PossiblyFixedAPIView(SerializerExtensionsAPIViewMixin, RetrieveAPIView):
     def get_extensions_query_params_enabled(self):
         return random.choice([True, False])
 ```
+
+Alternatively, you can also disable the feature globally through the
+`QUERY_PARAMS_ENABLED` setting:
+
+```py
+# settings.py
+REST_FRAMEWORK = dict(
+    SERIALIZER_EXTENSIONS=dict(
+        QUERY_PARAMS_ENABLED=False
+    )
+)
+```
