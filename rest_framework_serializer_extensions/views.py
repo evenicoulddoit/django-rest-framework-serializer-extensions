@@ -37,7 +37,7 @@ class SerializerExtensionsAPIViewMixin(object):
         for field in ['expand', 'expand_id_only', 'exclude', 'only']:
             field_names = getattr(self, 'extensions_{0}'.format(field), [])
 
-            if params_enabled:
+            if params_enabled and self.request is not None:
                 query_params = self.request.query_params.getlist(field)
 
                 if query_params:
