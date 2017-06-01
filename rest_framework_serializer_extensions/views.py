@@ -32,8 +32,7 @@ class SerializerExtensionsAPIViewMixin(object):
         through query parameters, or by the view.
         """
         context = dict()
-        
-        # Request is unset during API client discovery 
+        # Request is unset during API client discovery
         if self.request is None:
             return context
 
