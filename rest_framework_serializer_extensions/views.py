@@ -32,23 +32,28 @@ class SerializerExtensionsAPIViewMixin(object):
         through query parameters, or by the view.
         """
         context = dict()
-        params_enabled = self.get_extensions_query_params_enabled()
 
-        for field in ['expand', 'expand_id_only', 'exclude', 'only']:
-            field_names = getattr(self, 'extensions_{0}'.format(field), [])
+        # Request is unset during API client discovery
+        if self.request is None:
+            return context
+        else:
+            params_enabled = self.get_extensions_query_params_enabled()
 
-            if params_enabled:
-                query_params = self.request.query_params.getlist(field)
+            for field in ['expand', 'expand_id_only', 'exclude', 'only']:
+                field_names = getattr(self, 'extensions_{0}'.format(field), [])
 
-                if query_params:
-                    if len(query_params) == 1 and ',' in query_params[0]:
-                        field_names = query_params[0].split(',')
-                    else:
-                        field_names = query_params
+                if params_enabled:
+                    query_params = self.request.query_params.getlist(field)
 
-            context[field] = set(field_names)
+                    if query_params:
+                        if len(query_params) == 1 and ',' in query_params[0]:
+                            field_names = query_params[0].split(',')
+                        else:
+                            field_names = query_params
 
-        return context
+                context[field] = set(field_names)
+
+            return context
 
 
 class ExternalIdViewMixin(object):
