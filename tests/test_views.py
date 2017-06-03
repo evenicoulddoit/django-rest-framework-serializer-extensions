@@ -210,6 +210,10 @@ class GetSerializerContextTests(CBVTestCase):
             )
         )
 
+    def test_returns_empty_dict_when_no_request(self):
+        self.request = None
+        self.assertContextEquals(APITestView, dict())
+
 
 class SerializerExtensionsAPIViewMixinTests(TestCase):
     """
