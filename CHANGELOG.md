@@ -1,3 +1,6 @@
+### 0.5.2 (2017-06-19)
+* Bugfix to support Rest Framework JavaScript API client
+
 ### 0.5.1 (2017-04-11)
 * Bugfix to support expanding non-model serializers
 
