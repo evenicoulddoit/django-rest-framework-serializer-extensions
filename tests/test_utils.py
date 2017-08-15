@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import override_settings, TestCase
 
 from rest_framework_serializer_extensions import fields, utils
+from test_package.test_module.serializers import TestSerializer
 from tests import models
 from tests.base import TEST_HASH_IDS
 
@@ -29,6 +30,12 @@ class ImportLocalTests(TestCase):
             'rest_framework_serializer_extensions.fields.HashIdField'
         )
         self.assertIs(imported, fields.HashIdField)
+
+    def test_import_complex_path_within_installed_apps(self):
+        imported = utils.import_local(
+            'test_package.test_module.serializers.TestSerializer'
+        )
+        self.assertIs(imported, TestSerializer)
 
 
 class GetSettingTests(TestCase):
