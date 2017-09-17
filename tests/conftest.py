@@ -34,6 +34,7 @@ def pytest_configure():
             'rest_framework.authtoken',
             'rest_framework_serializer_extensions',
             'tests',
+            'test_package.test_module',
         ),
         PASSWORD_HASHERS=(
             'django.contrib.auth.hashers.SHA1PasswordHasher',

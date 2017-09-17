@@ -60,6 +60,11 @@ class SerializerExtensionsAPIViewMixin(object):
         through query parameters, or by the view.
         """
         context = dict(auto_optimize=self.get_extensions_auto_optimize())
+
+        # Request is unset during API client discovery
+        if self.request is None:
+            return context
+
         params_enabled = self.get_extensions_query_params_enabled()
 
         for field in ['expand', 'expand_id_only', 'exclude', 'only']:

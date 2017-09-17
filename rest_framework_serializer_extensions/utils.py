@@ -15,9 +15,14 @@ def import_local(path_to_object):
     """
     path, name = path_to_object.rsplit('.', 1)
 
-    app = path.split('.')[0]
+    path_pieces = path.split('.')
+    while path_pieces:
+        if '.'.join(path_pieces) not in settings.INSTALLED_APPS:
+            path_pieces.pop()
+        else:
+            break
 
-    if app not in settings.INSTALLED_APPS:
+    if not path_pieces:
         raise AssertionError(
             "Cannot import from outside installed apps"
         )
