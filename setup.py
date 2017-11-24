@@ -59,7 +59,7 @@ def get_long_description():
     try:
         import pypandoc
     except ImportError:
-        return open('README.md').read()
+        return open('README.md', encoding='utf-8').read()
     else:
         return pypandoc.convert('README.md', 'rst')
 
