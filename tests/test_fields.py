@@ -1,6 +1,11 @@
 from __future__ import absolute_import
 
-from django.core.urlresolvers import reverse
+# Django 1 vs. 2
+try:
+    from django.core.urlresolvers import reverse
+except ImportError:
+    from django.urls import reverse
+
 from django.test import override_settings, RequestFactory, TestCase
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import Serializer, ModelSerializer
