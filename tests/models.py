@@ -5,7 +5,8 @@ class Owner(models.Model):
     name = models.CharField(max_length=32)
     email = models.EmailField(unique=True)
     organization = models.ForeignKey(
-        'tests.Organization', related_name='staff'
+        'tests.Organization', related_name='staff',
+        on_delete=models.CASCADE
     )
 
 
@@ -15,7 +16,9 @@ class Organization(models.Model):
 
 class Sku(models.Model):
     variant = models.CharField(max_length=32)
-    model = models.ForeignKey('tests.CarModel', related_name='skus')
+    model = models.ForeignKey(
+        'tests.CarModel', related_name='skus', on_delete=models.CASCADE
+    )
     owners = models.ManyToManyField('tests.Owner', related_name='cars')
 
     class Meta:
@@ -26,7 +29,7 @@ class Sku(models.Model):
 class CarModel(models.Model):
     name = models.CharField(max_length=32)
     manufacturer = models.ForeignKey(
-        'tests.Manufacturer', related_name='models'
+        'tests.Manufacturer', related_name='models', on_delete=models.CASCADE
     )
 
 
