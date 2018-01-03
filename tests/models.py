@@ -28,7 +28,7 @@ class Owner(models.Model):
     name = models.CharField(max_length=32)
     email = models.EmailField(unique=True)
     organization = models.ForeignKey(
-        'tests.Organization', related_name='staff'
+        'tests.Organization', related_name='staff', on_delete=models.CASCADE
     )
     preferences = models.OneToOneField(
         'tests.OwnerPreferences', on_delete=models.PROTECT
@@ -37,7 +37,8 @@ class Owner(models.Model):
 
 class OwnerPreferences(models.Model):
     favorite_manufacturer = models.ForeignKey(
-        'tests.Manufacturer', related_name='fans', null=True
+        'tests.Manufacturer', related_name='fans', null=True,
+        on_delete=models.SET_NULL
     )
     price_limit_dollars = models.IntegerField(null=True)
 
