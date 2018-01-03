@@ -111,8 +111,12 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         skus = test_models.Sku.objects.all()
 
         for owner in test_models.Owner.objects.all():
-            owner.cars = skus
-            owner.save()
+            # TODO: Remove catch after dropping 1.8 support
+            try:
+                owner.cars.set(skus)
+            except AttributeError:
+                owner.cars = skus
+                owner.save()
 
     def get_view_instance(self, view_class, **kwargs):
         view = self.get_instance(view_class, **kwargs)
