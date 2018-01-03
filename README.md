@@ -22,9 +22,11 @@ API, we suggest you consider switching to HashIds instead.
 **:star: Lovingly open-sourced by [Housekeep](https://housekeep.com).**
 
 ## Requirements
-* Python (2.7, 3.4, 3.5)
-* [Django](https://github.com/django/django) (1.8, 1.9, 1.10)
-* [Django REST Framework](https://github.com/tomchristie/django-rest-framework) (3.3, 3.4, 3.5)
+Tested against:
+
+* Python (2.7, 3.5, 3.6)
+* [Django](https://github.com/django/django) (1.8, 1.11, 2.0)
+* [Django REST Framework](https://github.com/tomchristie/django-rest-framework) (3.5, 3.6, 3.7)
 * [HashIds](https://github.com/davidaurelio/hashids-python) (>1.0)
 
 
