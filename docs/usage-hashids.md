@@ -43,6 +43,51 @@ class OwnerSerializer(SerializerExtensionsMixin, ModelSerializer):
 }
 ```
 
+# Django Generic Class-Based Views
+The `ExternalIdViewMixin` is provided to simplify retrieving objects when using
+Rest Framework's
+[generic views](https://docs.djangoproject.com/en/2.0/topics/class-based-views/).
+
+Simply modify your views to apply the mixin:
+
+```py
+# views.py
+from rest_framework.generics import RetrieveAPIView
+
+from rest_framework_serializer_extensions.views import (
+    ExternalIdViewMixin, SerializerExtensionsAPIViewMixin)
+
+from app import models, serializers
+
+
+class OwnerAPIView(
+    ExternalIdViewMixin, SerializerExtensionsAPIViewMixin, RetrieveAPIView
+):
+    """
+    Automatically translates an external ID (HashId) to retrieve the Owner
+    """
+    queryset = models.Owner.objects.all()
+    serializer_class = serializers.OwnerTestSerializer
+```
+
+And use external IDs within your urls:
+
+```py
+# urls.py (Django 1 style)
+from django.conf.urls import url
+
+from app import views
+
+
+urlpatterns = [
+    url(
+        r'^owners/(?P<external_id>\w+)/$',
+        views.OwnerAPIView.as_view(),
+        name='owners'
+    ),
+]
+```
+
 # HashIdField
 You can serialize HashIds as and when required using the `HashIdField`:
 
