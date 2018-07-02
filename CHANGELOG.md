@@ -1,3 +1,7 @@
+### 0.6.0 (2018-07--02)
+* Adds the ability to automatically optimize the queryset used to generate
+  the response. This feature is disabled by default, and is experimental
+
 ### 0.5.4 (2017-12-23)
 * Fixes package build issues when using Python3 (see #15 - thanks @KyeRussell)
 * Bumps dependencies and Django support to include Django 2
