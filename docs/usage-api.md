@@ -24,6 +24,15 @@ A dot-delimited path string to your HashIds source within your project.
 The maximum depth that any serializer can be expanded to within your
 project (default: `3`).
 
+**`QUERY_PARAMS_ENABLED`**`(bool)` <br>
+Whether to allow end user to
+[manipulate the filtered / expanded fields](usage-views.md)
+(default: `True`).
+
+**`AUTO_OPTIMIZE`**`(bool)` <br>
+Whether to enable [automatic queryset optimization](auto-optimizations.md)
+for all views (default: `False`).
+
 
 # Expandable field definition
 Each expandable field definition should consist of a dictionary, where the

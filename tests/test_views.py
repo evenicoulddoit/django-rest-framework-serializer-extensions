@@ -2,58 +2,13 @@ from __future__ import absolute_import
 
 from django.http import QueryDict
 from django.test import override_settings, RequestFactory, TestCase
-from rest_framework.generics import RetrieveAPIView
-from rest_framework.serializers import ModelSerializer
+from mock import patch
 from test_plus.test import CBVTestCase
 
-from rest_framework_serializer_extensions import utils, serializers, views
-from tests import models
+from rest_framework_serializer_extensions import (
+    utils as extensions_utils, views as extensions_views)
 
-
-"""
-START TEST VIEWS & SERIALIZERS
-"""
-
-
-class SkuTestSerializer(
-    serializers.SerializerExtensionsMixin, ModelSerializer
-):
-    class Meta:
-        model = models.Sku
-        fields = ('id', 'variant')
-
-
-class OrganizationTestSerializer(
-    serializers.SerializerExtensionsMixin, ModelSerializer
-):
-    class Meta:
-        model = models.Organization
-        fields = ('id', 'name')
-
-
-class OwnerTestSerializer(
-    serializers.SerializerExtensionsMixin, ModelSerializer
-):
-    class Meta:
-        model = models.Owner
-        fields = ('id', 'name')
-        expandable_fields = dict(
-            organization=OrganizationTestSerializer,
-            cars=dict(
-                serializer=SkuTestSerializer,
-                many=True
-            )
-        )
-
-
-class APITestView(views.SerializerExtensionsAPIViewMixin, RetrieveAPIView):
-    queryset = models.Owner.objects.all()
-    serializer_class = OwnerTestSerializer
-
-
-"""
-END TEST VIEWS & SERIALIZERS
-"""
+from tests import models as test_models, views as test_views
 
 
 class GetSerializerContextTests(CBVTestCase):
@@ -69,20 +24,20 @@ class GetSerializerContextTests(CBVTestCase):
         self.request = RequestFactory().get('/')
         self.request.query_params = self.query_params
 
-    def assertContextEquals(self, view_class, expected_context):
+    def assertInContext(self, view_class, expected_context):
         view = self.get_instance(view_class)
         view.format_kwarg = 'json'
         view.request = self.request
-        expected_context.update(
-            request=self.request,
-            view=view,
-            format='json'
-        )
-        self.assertDictEqual(view.get_serializer_context(), expected_context)
+        actual_context = {
+            key: value
+            for key, value in view.get_serializer_context().items()
+            if key in expected_context
+        }
+        self.assertDictEqual(actual_context, expected_context)
 
     def test_no_attribute_field_names(self):
-        self.assertContextEquals(
-            APITestView,
+        self.assertInContext(
+            test_views.OwnerAPITestView,
             dict(
                 expand=set(),
                 expand_id_only=set(),
@@ -92,13 +47,13 @@ class GetSerializerContextTests(CBVTestCase):
         )
 
     def test_attribute_field_names(self):
-        class View(APITestView):
+        class View(test_views.OwnerAPITestView):
             extensions_expand = {'a', 'a1'}
             extensions_expand_id_only = {'b'}
             extensions_exclude = {'c'}
             extensions_only = {'d', 'd1', 'd2'}
 
-        self.assertContextEquals(
+        self.assertInContext(
             View,
             dict(
                 expand={'a', 'a1'},
@@ -114,8 +69,8 @@ class GetSerializerContextTests(CBVTestCase):
         self.query_params.setlist('exclude', ['c'])
         self.query_params.setlist('only', ['d', 'd1', 'd2'])
 
-        self.assertContextEquals(
-            APITestView,
+        self.assertInContext(
+            test_views.OwnerAPITestView,
             dict(
                 expand={'a', 'a1'},
                 expand_id_only={'b'},
@@ -130,8 +85,8 @@ class GetSerializerContextTests(CBVTestCase):
         self.query_params.setlist('exclude', ['c'])
         self.query_params.setlist('only', ['d,d1,d2'])
 
-        self.assertContextEquals(
-            APITestView,
+        self.assertInContext(
+            test_views.OwnerAPITestView,
             dict(
                 expand={'a', 'a1'},
                 expand_id_only={'b'},
@@ -141,7 +96,7 @@ class GetSerializerContextTests(CBVTestCase):
         )
 
     def test_query_params_override_attribute_field_names(self):
-        class View(APITestView):
+        class View(test_views.OwnerAPITestView):
             extensions_expand = {'a', 'a1'}
             extensions_expand_id_only = {'b'}
             extensions_exclude = {'c'}
@@ -152,7 +107,7 @@ class GetSerializerContextTests(CBVTestCase):
         self.query_params.setlist('exclude', ['override_c'])
         self.query_params.setlist('only', ['override_d'])
 
-        self.assertContextEquals(
+        self.assertInContext(
             View,
             dict(
                 expand={'override_a'},
@@ -163,7 +118,7 @@ class GetSerializerContextTests(CBVTestCase):
         )
 
     def test_query_params_disabled_attribute(self):
-        class View(APITestView):
+        class View(test_views.OwnerAPITestView):
             extensions_query_params_enabled = False
             extensions_expand = {'a', 'a1'}
             extensions_expand_id_only = {'b'}
@@ -175,7 +130,7 @@ class GetSerializerContextTests(CBVTestCase):
         self.query_params.setlist('exclude', ['override_c'])
         self.query_params.setlist('only', ['override_d'])
 
-        self.assertContextEquals(
+        self.assertInContext(
             View,
             dict(
                 expand={'a', 'a1'},
@@ -186,7 +141,7 @@ class GetSerializerContextTests(CBVTestCase):
         )
 
     def test_query_params_disabled_method(self):
-        class View(APITestView):
+        class View(test_views.OwnerAPITestView):
             extensions_expand = {'a', 'a1'}
             extensions_expand_id_only = {'b'}
             extensions_exclude = {'c'}
@@ -200,7 +155,7 @@ class GetSerializerContextTests(CBVTestCase):
         self.query_params.setlist('exclude', ['override_c'])
         self.query_params.setlist('only', ['override_d'])
 
-        self.assertContextEquals(
+        self.assertInContext(
             View,
             dict(
                 expand={'a', 'a1'},
@@ -210,9 +165,23 @@ class GetSerializerContextTests(CBVTestCase):
             )
         )
 
-    def test_returns_empty_dict_when_no_request(self):
-        self.request = None
-        self.assertContextEquals(APITestView, dict())
+    @patch.object(
+        extensions_views.SerializerExtensionsAPIViewMixin,
+        'get_extensions_auto_optimize'
+    )
+    def test_auto_optimization_included(self, mock_get_auto_optimize):
+        """
+        The "auto_optimize" value is passed to the context correctly.
+        """
+        mock_get_auto_optimize.return_value = False
+        self.assertInContext(
+            test_views.OwnerAPITestView, dict(auto_optimize=False)
+        )
+
+        mock_get_auto_optimize.return_value = True
+        self.assertInContext(
+            test_views.OwnerAPITestView, dict(auto_optimize=True)
+        )
 
 
 class SerializerExtensionsAPIViewMixinTests(TestCase):
@@ -222,16 +191,17 @@ class SerializerExtensionsAPIViewMixinTests(TestCase):
     fixtures = ['test_data.json']
 
     def setUp(self):
-        self.owner = models.Owner.objects.get()
-        self.organization = models.Organization.objects.get()
-        self.sku_p100d = models.Sku.objects.get(variant='P100D')
+        self.owner = test_models.Owner.objects.get()
+        self.organization = test_models.Organization.objects.get()
+        self.sku_p100d = test_models.Sku.objects.get(variant='P100D')
+        self.carmodel_model_s = test_models.CarModel.objects.get()
 
     def get_response_data(self, **params):
         query_params = QueryDict(mutable=True)
         query_params.update(**params)
         request = RequestFactory().get('/')
         request.GET = query_params
-        view = APITestView.as_view()
+        view = test_views.OwnerAPITestView.as_view()
         return view(request, pk=self.owner.pk).data
 
     def test_no_modifications(self):
@@ -256,7 +226,10 @@ class SerializerExtensionsAPIViewMixinTests(TestCase):
             data,
             dict(
                 cars=[
-                    dict(variant=self.sku_p100d.variant)
+                    dict(
+                        variant=self.sku_p100d.variant,
+                        model_id=self.carmodel_model_s.pk
+                    )
                 ]
             )
         )
@@ -280,10 +253,12 @@ class ExternalIdViewMixinTests(TestCase):
     fixtures = ['test_data.json']
 
     def setUp(self):
-        self.owner = models.Owner.objects.get()
-        self.sku_p100d = models.Sku.objects.get(variant='P100D')
+        self.owner = test_models.Owner.objects.get()
+        self.sku_p100d = test_models.Sku.objects.get(variant='P100D')
 
-        class View(views.ExternalIdViewMixin, APITestView):
+        class View(
+            extensions_views.ExternalIdViewMixin, test_views.OwnerAPITestView
+        ):
             pass
 
         self.view_class = View
@@ -294,16 +269,18 @@ class ExternalIdViewMixinTests(TestCase):
         return view(request, pk=pk)
 
     def test_matches_against_external_id(self):
-        external_id = utils.external_id_from_model_and_internal_id(
-            models.Owner, self.owner.pk
+        external_id = extensions_utils.external_id_from_model_and_internal_id(
+            test_models.Owner, self.owner.pk
         )
         response = self.get_response(external_id)
         self.assertEquals(200, response.status_code)
         self.assertEquals(self.owner.pk, response.data['id'])
 
     def test_raises_404_when_not_found(self):
-        bad_external_id = utils.external_id_from_model_and_internal_id(
-            models.Sku, self.sku_p100d.pk
+        bad_external_id = (
+            extensions_utils.external_id_from_model_and_internal_id(
+                test_models.Sku, self.sku_p100d.pk
+            )
         )
         response = self.get_response(bad_external_id)
         self.assertEquals(404, response.status_code)

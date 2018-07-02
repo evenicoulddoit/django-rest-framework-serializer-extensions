@@ -9,9 +9,11 @@ Full documentation: http://django-rest-framework-serializer-extensions.readthedo
 
 
 ## Overview
-Serializer extensions reduces the need for *very similar* serializers,
-by allowing the fields to be defined on a *per-view/request* basis. Fields can
-be whitelisted, blacklisted, and child serializers can be optionally expanded.
+Serializer extensions reduces the need for *very similar* serializers, by
+allowing the fields to be defined on a *per-view/request* basis. Fields can be
+whitelisted, blacklisted, and child serializers can be optionally expanded.
+Whatever fields you choose to use, your querysets can be *optimized
+automatically* to make the fewest database calls possible.
 
 Support for [HashIds](https://github.com/davidaurelio/hashids-python) is
 also provided. If you're currently exposing your internal IDs over a public

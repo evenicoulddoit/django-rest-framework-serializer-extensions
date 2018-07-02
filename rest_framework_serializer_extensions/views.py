@@ -8,7 +8,23 @@ class SerializerExtensionsAPIViewMixin(object):
     """
     Mixin to provide support for Serializer Extensions within API views.
     """
-    extensions_query_params_enabled = True
+    def get_queryset(self):
+        """
+        Automatically optimize the queryset depending on the expand context.
+        """
+        qs = super(SerializerExtensionsAPIViewMixin, self).get_queryset()
+
+        if self.get_extensions_auto_optimize():
+            qs = self.get_auto_optimized_queryset(qs)
+
+        return qs
+
+    def get_auto_optimized_queryset(self, qs):
+        context = self.get_extensions_mixin_context()
+        expand = context['expand'] | context['expand_id_only']
+        serializer = self.get_serializer_class()(context=dict(expand=expand))
+        qs = serializer.auto_optimize(qs)
+        return qs
 
     def get_serializer_context(self):
         context = (
@@ -22,7 +38,19 @@ class SerializerExtensionsAPIViewMixin(object):
         """
         Return whether the serializer context can be set using query params.
         """
-        return self.extensions_query_params_enabled
+        try:
+            return self.extensions_query_params_enabled
+        except AttributeError:
+            return utils.get_setting('QUERY_PARAMS_ENABLED', default=True)
+
+    def get_extensions_auto_optimize(self):
+        """
+        Return whether to automatically optimize the queryset.
+        """
+        try:
+            return self.extensions_auto_optimize
+        except AttributeError:
+            return utils.get_setting('AUTO_OPTIMIZE', default=False)
 
     def get_extensions_mixin_context(self):
         """
@@ -31,7 +59,7 @@ class SerializerExtensionsAPIViewMixin(object):
         The field names to include, exclude or expand can be set either
         through query parameters, or by the view.
         """
-        context = dict()
+        context = dict(auto_optimize=self.get_extensions_auto_optimize())
 
         # Request is unset during API client discovery
         if self.request is None:

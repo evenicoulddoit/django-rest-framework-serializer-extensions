@@ -1,11 +1,20 @@
 [
   {
+    "model": "tests.ownerpreferences",
+    "pk": 1,
+    "fields": {
+      "favorite_manufacturer": 1,
+      "price_limit_dollars": 100000
+    }
+  },
+  {
     "model": "tests.owner",
     "pk": 1,
     "fields": {
       "name": "Tyrell",
       "email": "t.wellick@e-corp.com",
-      "organization": 1
+      "organization": 1,
+      "preferences": 1
     }
   },
   {
