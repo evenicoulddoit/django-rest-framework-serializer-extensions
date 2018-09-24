@@ -171,6 +171,8 @@ It is important to note that we are passing an organization's ID to the
 `organization_id` field, not a dictionary of properties to the `organization`
 field.
 
+To support nullable foreign key relationship in writable situation, set `allow_null=True` after `read_only=False`.
+
 During validation the serializer will find the corresponding organization and
 add make it available in the deserialized data under the key
 `organization_id_resolved`:
