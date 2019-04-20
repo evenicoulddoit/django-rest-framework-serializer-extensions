@@ -181,14 +181,14 @@ class ExcludeFieldsSerializerMixinTests(SerializerMixinTestCase):
         self.assertEqual(root_1.keys(), root_2.keys())
 
         # And that order matches the serializer field ordering
-        self.assertListEqual(root_1.keys(), ['name', 'skus'])
+        self.assertEqual(list(root_1.keys()), ['name', 'skus'])
 
     def test_field_ordering_unchanged_nested(self):
         child_1 = self.serialize(exclude=('skus__variant',))
         child_2 = self.serialize(exclude=('skus__owners',))
 
         keys_1 = child_1['skus'][0].keys()
-        self.assertListEqual(keys_1, ['id', 'owners'])
+        self.assertEqual(list(keys_1), ['id', 'owners'])
 
         keys_2 = child_2['skus'][0].keys()
-        self.assertListEqual(keys_2, ['id', 'variant'])
+        self.assertEqual(list(keys_2), ['id', 'variant'])
