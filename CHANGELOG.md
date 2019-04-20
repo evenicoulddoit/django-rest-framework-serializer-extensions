@@ -1,3 +1,6 @@
+### Unreleased
+* Using the `order` or `excludes` keywords retains the original field ordering
+
 ### 0.6.0 (2018-07--02)
 * Adds the ability to automatically optimize the queryset used to generate
   the response. This feature is disabled by default, and is experimental
