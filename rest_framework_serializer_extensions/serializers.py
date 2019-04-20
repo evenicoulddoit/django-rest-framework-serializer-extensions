@@ -737,11 +737,11 @@ class OnlyFieldsMixin(object):
                 )
             )
 
-        return {
-            name: field
+        return OrderedDict(
+            (name, field)
             for name, field in six.iteritems(fields)
             if name in only_names
-        }
+        )
 
 
 class ExcludeFieldsMixin(object):
@@ -777,11 +777,11 @@ class ExcludeFieldsMixin(object):
                 )
             )
 
-        return {
-            name: field
+        return OrderedDict(
+            (name, field)
             for name, field in six.iteritems(fields)
             if name not in exclude_names
-        }
+        )
 
 
 class SerializerHelpersMixin(object):
