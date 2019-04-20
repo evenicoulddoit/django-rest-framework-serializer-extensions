@@ -1,6 +1,6 @@
 # Minimum Django and REST framework version
-Django>=1.8
-djangorestframework>=3.5.4
+Django>=1.11
+djangorestframework>=3.7.7
 
 # Test requirements
 pytest-django==3.1.2
