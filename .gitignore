@@ -1,5 +1,6 @@
 .cache
 .coverage
+.project
 .tox
 build
 dist
