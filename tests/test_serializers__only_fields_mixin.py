@@ -239,7 +239,7 @@ class OnlyFieldsSerializerMixinTests(SerializerMixinTestCase):
         self.assertEqual(root_1.keys(), root_2.keys())
 
         # And that order matches the serializer field ordering
-        self.assertListEqual(root_1.keys(), ['id', 'name', 'manufacturer'])
+        self.assertEqual(list(root_1.keys()), ['id', 'name', 'manufacturer'])
 
     def test_field_ordering_unchanged_nested(self):
         child_1 = self.serialize(only=('skus__variant', 'skus__owners'))
@@ -249,4 +249,4 @@ class OnlyFieldsSerializerMixinTests(SerializerMixinTestCase):
         keys_2 = child_2['skus'][0].keys()
 
         self.assertEqual(keys_1, keys_2)
-        self.assertListEqual(keys_1, ['variant', 'owners'])
+        self.assertEqual(list(keys_1), ['variant', 'owners'])
