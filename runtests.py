@@ -12,7 +12,11 @@ PYTEST_ARGS = {
     'fast': ['tests', '-q'],
 }
 
-FLAKE8_ARGS = ['rest_framework_serializer_extensions', 'tests', '--ignore=E501']
+FLAKE8_ARGS = [
+    'rest_framework_serializer_extensions',
+    'tests',
+    '--ignore=E501,W504',
+]
 
 
 sys.path.append(os.path.dirname(__file__))
