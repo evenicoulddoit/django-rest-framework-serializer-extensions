@@ -1,7 +1,9 @@
-### Unreleased
+### 1.0.0 (2019-04-21)
 * Using the `order` or `excludes` keywords retains the original field ordering
+* Bumping to first major version. Seems this package has enough usage without
+  major issues to suggest it's production-ready
 
-### 0.6.0 (2018-07--02)
+### 0.6.0 (2018-07-02)
 * Adds the ability to automatically optimize the queryset used to generate
   the response. This feature is disabled by default, and is experimental
 
