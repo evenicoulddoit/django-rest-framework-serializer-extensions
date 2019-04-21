@@ -3,11 +3,11 @@ Django>=1.11
 djangorestframework>=3.7.7
 
 # Test requirements
-pytest-django==3.1.2
-pytest==3.0.5
-pytest-cov==2.4.0
-flake8==3.2.1
-django-test-plus==1.0.21
+pytest-django==3.4.8
+pytest==4.4.1
+pytest-cov==2.6.1
+flake8==3.7.7
+django-test-plus==1.1.1
 mock==2.0.0
 
 # App requirements
