@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.contrib.contenttypes.models import ContentType
 from django.test import override_settings, TestCase
+from django.utils import six
 
 from rest_framework_serializer_extensions import fields, utils
 from test_package.test_module.serializers import TestSerializer
@@ -58,7 +59,7 @@ class GetSettingTests(TestCase):
         )
     )
     def test_extension_setting_exists(self):
-        self.assertEquals('bar', utils.get_setting('FOO'))
+        self.assertEqual('bar', utils.get_setting('FOO'))
 
     @override_settings(REST_FRAMEWORK=dict(SERIALIZER_EXTENSIONS=dict()))
     def test_extension_setting_does_not_exist(self):
@@ -70,7 +71,7 @@ class GetHashIdsSourceTests(TestCase):
     Unit tests for the get_hash_ids_source() utility method.
     """
     def test_unset_raises(self):
-        with self.assertRaisesRegexp(AssertionError, 'No HASH_IDS_SOURCE'):
+        with six.assertRaisesRegex(self, AssertionError, 'No HASH_IDS_SOURCE'):
             utils.get_hash_ids_source()
 
     @override_settings(
@@ -144,7 +145,7 @@ class InternalIdFromModelAndExternalIdTests(TestCase):
         org_b = models.Organization.objects.create(name='b')
 
         external_id_a = utils.get_hash_ids_source().encode(ct_org.pk, org_a.pk)
-        self.assertEquals(
+        self.assertEqual(
             org_a.pk,
             utils.internal_id_from_model_and_external_id(
                 models.Organization, external_id_a
@@ -152,7 +153,7 @@ class InternalIdFromModelAndExternalIdTests(TestCase):
         )
 
         external_id_b = utils.get_hash_ids_source().encode(ct_org.pk, org_b.pk)
-        self.assertEquals(
+        self.assertEqual(
             org_b.pk,
             utils.internal_id_from_model_and_external_id(
                 models.Organization, external_id_b
@@ -168,14 +169,14 @@ class ModelFromDefinitionTests(TestCase):
         """
         An error should be raised when a non-Django model class is passed.
         """
-        with self.assertRaisesRegexp(AssertionError, 'not a Django model'):
+        with six.assertRaisesRegex(self, AssertionError, 'not a Django model'):
             utils.model_from_definition(dict)
 
     def test_pass_string_as_model_definition(self):
         """
         Passing string corresponding to model should import and return model.
         """
-        self.assertEquals(
+        self.assertEqual(
             models.CarModel,
             utils.model_from_definition('tests.models.CarModel')
         )
@@ -184,6 +185,6 @@ class ModelFromDefinitionTests(TestCase):
         """
         Test that the method returns its argument when Django model is passed.
         """
-        self.assertEquals(
+        self.assertEqual(
             models.CarModel, utils.model_from_definition(models.CarModel)
         )

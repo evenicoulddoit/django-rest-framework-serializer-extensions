@@ -100,22 +100,22 @@ class SerializerHelpersHierarchyTests(TestCase):
         self.fields = CarModelTestSerializer().fields
 
     def test_hierarchy_root(self):
-        self.assertEquals('', CarModelTestSerializer().hierarchy)
+        self.assertEqual('', CarModelTestSerializer().hierarchy)
 
     def test_child_serializer(self):
-        self.assertEquals(
+        self.assertEqual(
             'manufacturer',
             self.fields['manufacturer'].hierarchy
         )
 
     def test_many_child_serializer(self):
-        self.assertEquals(
+        self.assertEqual(
             'skus',
             self.fields['skus'].child.hierarchy
         )
 
     def test_nested_child_serializer(self):
-        self.assertEquals(
+        self.assertEqual(
             'skus__owners',
             self.fields['skus'].child.fields['owners'].child.hierarchy
         )
@@ -127,7 +127,7 @@ class SerializerHelpersHierarchyTests(TestCase):
             .child.fields['organization']
         )
 
-        self.assertEquals(
+        self.assertEqual(
             'skus__owners__organization',
             nested_serializer.hierarchy
         )
@@ -149,16 +149,16 @@ class RepresentChildTests(TestCase):
         self.serialized = self.serializer.data
 
     def test_hierarchy_maintained(self):
-        self.assertEquals('child', self.serialized['child']['hierarchy'])
+        self.assertEqual('child', self.serialized['child']['hierarchy'])
 
     def test_instance_passed(self):
-        self.assertEquals(
+        self.assertEqual(
             self.internal_value['child']['id'],
             self.serialized['child']['id']
         )
 
     def test_context_passed(self):
-        self.assertEquals(
+        self.assertEqual(
             self.context['label'],
             self.serialized['child']['context_label']
         )

@@ -151,7 +151,7 @@ class TestAutoOptimizedQueryset(CBVTestCase):
             view_class, optimize=False, **query_params
         )
 
-        self.assertEquals(
+        self.assertEqual(
             self.query_counter.count, expected_unoptimized,
             (
                 "Expected {0} unoptimized queries, actually {1}."
@@ -159,7 +159,7 @@ class TestAutoOptimizedQueryset(CBVTestCase):
             )
         )
         response_optimized = self.get(view_class, **query_params)
-        self.assertEquals(
+        self.assertEqual(
             self.query_counter.count, expected_optimized,
             (
                 "Expected {0} optimized queries, actually {1}."
@@ -167,7 +167,7 @@ class TestAutoOptimizedQueryset(CBVTestCase):
             )
         )
 
-        self.assertEquals(
+        self.assertEqual(
             response_optimized.data,
             response_unoptimized.data,
             "Optimized and unoptimized serialized results differed."
@@ -189,7 +189,7 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         view.extensions_auto_optimize = True
         queryset = view.get_queryset()
         mock_auto_optimize.assert_called_once()
-        self.assertEquals('optimized', queryset)
+        self.assertEqual('optimized', queryset)
 
     @patch.object(test_serializers.OwnerTestSerializer, 'auto_optimize')
     def test_method_enabled_auto_optimization(self, mock_auto_optimize):
@@ -201,7 +201,7 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         view.get_extensions_auto_optimize = lambda: True
         queryset = view.get_queryset()
         mock_auto_optimize.assert_called_once()
-        self.assertEquals('optimized', queryset)
+        self.assertEqual('optimized', queryset)
 
     @override_settings(
         REST_FRAMEWORK=dict(
@@ -219,7 +219,7 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         view = self.get_view_instance(test_views.OwnerAPITestView)
         queryset = view.get_queryset()
         mock_auto_optimize.assert_called_once()
-        self.assertEquals('optimized', queryset)
+        self.assertEqual('optimized', queryset)
 
     def test_no_expansion(self):
         self.assertNumQueries(

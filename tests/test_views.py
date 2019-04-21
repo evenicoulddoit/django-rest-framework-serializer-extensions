@@ -273,8 +273,8 @@ class ExternalIdViewMixinTests(TestCase):
             test_models.Owner, self.owner.pk
         )
         response = self.get_response(external_id)
-        self.assertEquals(200, response.status_code)
-        self.assertEquals(self.owner.pk, response.data['id'])
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(self.owner.pk, response.data['id'])
 
     def test_raises_404_when_not_found(self):
         bad_external_id = (
@@ -283,4 +283,4 @@ class ExternalIdViewMixinTests(TestCase):
             )
         )
         response = self.get_response(bad_external_id)
-        self.assertEquals(404, response.status_code)
+        self.assertEqual(404, response.status_code)

@@ -7,6 +7,7 @@ except ImportError:
     from django.urls import reverse
 
 from django.test import override_settings, RequestFactory, TestCase
+from django.utils import six
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import Serializer, ModelSerializer
 
@@ -77,7 +78,7 @@ class HashIdFieldTests(BaseFieldsTestCase):
     Unit tests for the HashIdField
     """
     def test_representation_requires_model(self):
-        with self.assertRaisesRegexp(AssertionError, 'No "model"'):
+        with six.assertRaisesRegex(self, AssertionError, 'No "model"'):
             fields.HashIdField().to_representation(self.car_model.pk)
 
     def test_representation_explicit_model_object(self):
@@ -85,17 +86,17 @@ class HashIdFieldTests(BaseFieldsTestCase):
             fields.HashIdField(model=models.CarModel)
             .to_representation(self.car_model.pk)
         )
-        self.assertEquals(self.external_id(self.car_model), representation)
+        self.assertEqual(self.external_id(self.car_model), representation)
 
     def test_representation_explicit_model_reference(self):
         representation = (
             fields.HashIdField(model='tests.models.CarModel')
             .to_representation(self.car_model.pk)
         )
-        self.assertEquals(self.external_id(self.car_model), representation)
+        self.assertEqual(self.external_id(self.car_model), representation)
 
     def test_representation_explicit_invalid_model_reference(self):
-        with self.assertRaisesRegexp(AssertionError, 'not a Django model'):
+        with six.assertRaisesRegex(self, AssertionError, 'not a Django model'):
             (
                 fields.HashIdField(model='tests.base.TEST_HASH_IDS')
                 .to_representation(self.car_model.pk)
@@ -107,7 +108,7 @@ class HashIdFieldTests(BaseFieldsTestCase):
         """
         field = CarModelTestSerializer().fields['id']
         representation = field.to_representation(self.car_model.pk)
-        self.assertEquals(self.external_id(self.car_model), representation)
+        self.assertEqual(self.external_id(self.car_model), representation)
 
     def test_representation_explicit_model_serializer_method(self):
         """
@@ -115,10 +116,10 @@ class HashIdFieldTests(BaseFieldsTestCase):
         """
         field = CarModelMethodTestSerializer().fields['manufacturer_id']
         representation = field.to_representation(self.manufacturer.pk)
-        self.assertEquals(self.external_id(self.manufacturer), representation)
+        self.assertEqual(self.external_id(self.manufacturer), representation)
 
     def test_internal_value_requires_model(self):
-        with self.assertRaisesRegexp(AssertionError, 'No "model"'):
+        with six.assertRaisesRegex(self, AssertionError, 'No "model"'):
             fields.HashIdField().to_internal_value(
                 self.external_id(self.car_model)
             )
@@ -128,24 +129,26 @@ class HashIdFieldTests(BaseFieldsTestCase):
             fields.HashIdField(model=models.CarModel)
             .to_internal_value(self.external_id(self.car_model))
         )
-        self.assertEquals(self.car_model.pk, internal_value)
+        self.assertEqual(self.car_model.pk, internal_value)
 
     def test_internal_value_explicit_model_reference(self):
         internal_value = (
             fields.HashIdField(model='tests.models.CarModel')
             .to_internal_value(self.external_id(self.car_model))
         )
-        self.assertEquals(self.car_model.pk, internal_value)
+        self.assertEqual(self.car_model.pk, internal_value)
 
     def test_internal_value_explicit_invalid_model_reference(self):
-        with self.assertRaisesRegexp(AssertionError, 'not a Django model'):
+        with six.assertRaisesRegex(self, AssertionError, 'not a Django model'):
             (
                 fields.HashIdField(model='tests.base.TEST_HASH_IDS')
                 .to_internal_value(self.external_id(self.car_model))
             )
 
     def test_internal_value_hash_id_validation(self):
-        with self.assertRaisesRegexp(ValidationError, 'not a valid HashId'):
+        with six.assertRaisesRegex(
+            self, ValidationError, 'not a valid HashId'
+        ):
             (
                 fields.HashIdField(model='tests.models.CarModel')
                 .to_internal_value('abc123')
@@ -159,7 +162,7 @@ class HashIdFieldTests(BaseFieldsTestCase):
         internal_value = field.to_internal_value(
             self.external_id(self.car_model)
         )
-        self.assertEquals(self.car_model.pk, internal_value)
+        self.assertEqual(self.car_model.pk, internal_value)
 
     def test_internal_value_explicit_model_serializer_method(self):
         """
@@ -169,7 +172,7 @@ class HashIdFieldTests(BaseFieldsTestCase):
         internal_value = field.to_internal_value(
             self.external_id(self.manufacturer)
         )
-        self.assertEquals(self.manufacturer.pk, internal_value)
+        self.assertEqual(self.manufacturer.pk, internal_value)
 
 
 class HashIdHyperlinkedIdentityFieldTests(BaseFieldsTestCase):
@@ -208,7 +211,7 @@ class HashIdHyperlinkedIdentityFieldTests(BaseFieldsTestCase):
         expected_path = reverse(
             'car_model', args=(self.external_id(self.manufacturer),)
         )
-        self.assertEquals(
+        self.assertEqual(
             serialized['manufacturer'],
             'http://testserver{0}'.format(expected_path)
         )

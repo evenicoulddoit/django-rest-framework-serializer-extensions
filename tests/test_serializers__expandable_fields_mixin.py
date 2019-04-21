@@ -724,7 +724,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             )
         )
         self.assertTrue(serializer.is_valid())
-        self.assertEquals(dict(name='Ka'), serializer.validated_data)
+        self.assertEqual(dict(name='Ka'), serializer.validated_data)
 
     def test_deserialize_writable_field(self):
         """
@@ -739,7 +739,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             )
         )
         self.assertTrue(serializer.is_valid())
-        self.assertEquals(
+        self.assertEqual(
             dict(
                 name='Ka',
                 manufacturer_id=self.manufacturer_tesla.pk,
