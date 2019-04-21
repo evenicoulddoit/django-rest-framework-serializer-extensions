@@ -13,6 +13,7 @@ url = 'https://github.com/evenicoulddoit/django-rest-framework-serializer-extens
 author = 'Ian Clark'
 author_email = 'ianclark001@gmail.com'
 license = 'BSD'
+long_description_content_type = 'text/markdown'
 
 
 def get_version(package):
@@ -52,19 +53,11 @@ def get_package_data(package):
 def get_long_description():
     """
     Return the long package description by parsing the README markdown file.
-
-    If PyPandoc is available, convert the Markdown to reStructuredText,
-    as PyPI doesn't support Markdown.
     """
-    try:
-        import pypandoc
-    except ImportError:
-        if sys.version_info.major < 3:
-            return open('README.md').read()
-        else:
-            return open('README.md', encoding='utf-8').read()
+    if sys.version_info.major < 3:
+        return open('README.md').read()
     else:
-        return pypandoc.convert('README.md', 'rst')
+        return open('README.md', encoding='utf-8').read()
 
 
 version = get_version(package)
@@ -89,6 +82,7 @@ setup(
     license=license,
     description=description,
     long_description=get_long_description(),
+    long_description_content_type=long_description_content_type,
     author=author,
     author_email=author_email,
     packages=get_packages(package),
