@@ -1,9 +1,9 @@
 import importlib
 
+import six
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.utils import six
 
 
 def import_local(path_to_object):

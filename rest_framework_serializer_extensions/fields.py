@@ -1,5 +1,5 @@
+import six
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import six
 from rest_framework.fields import Field
 from rest_framework.relations import (
     HyperlinkedIdentityField, HyperlinkedRelatedField)

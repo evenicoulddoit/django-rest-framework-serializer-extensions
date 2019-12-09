@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
+import six
 from django.contrib.contenttypes.models import ContentType
 from django.test import override_settings, TestCase
-from django.utils import six
 
 from rest_framework_serializer_extensions import fields, utils
 from test_package.test_module.serializers import TestSerializer

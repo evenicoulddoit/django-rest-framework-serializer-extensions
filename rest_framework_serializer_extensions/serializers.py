@@ -1,19 +1,19 @@
 from __future__ import absolute_import
+
 from collections import OrderedDict
 from pprint import pformat
 
+import six
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models import Prefetch
 from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
-from django.utils import six
 from rest_framework import serializers
 from rest_framework.fields import empty
 
 from rest_framework_serializer_extensions import (
     fields as custom_fields, utils
 )
-
 
 SOURCE_DELIMITER = '.'
 QUERYSET_DELIMITER = '__'
