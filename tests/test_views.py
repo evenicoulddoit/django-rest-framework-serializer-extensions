@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from django.http import QueryDict
 from django.test import override_settings, RequestFactory, TestCase
 from mock import patch

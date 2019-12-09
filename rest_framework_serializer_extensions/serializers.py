@@ -1,9 +1,6 @@
-from __future__ import absolute_import
-
 from collections import OrderedDict
 from pprint import pformat
 
-import six
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models import Prefetch
 from django.db.models.fields.related import ForeignKey
@@ -336,7 +333,7 @@ class ExpandableFieldsMixin(object):
         """
         expand_fields = self._get_expand_fields()
 
-        for field_name, field in six.iteritems(expand_fields):
+        for field_name, field in expand_fields.items():
             if field_name.endswith('_id'):
                 field_definition = self.expandable_fields[field_name[:-3]]
             else:
@@ -416,7 +413,7 @@ class ExpandableFieldsMixin(object):
     def _standardise_expandable_definitions(self, expandable_fields):
         return {
             key: self._standardise_expandable_definition(definition)
-            for key, definition in six.iteritems(expandable_fields)
+            for key, definition in expandable_fields.items()
         }
 
     def _standardise_expandable_definition(self, definition):
@@ -427,7 +424,7 @@ class ExpandableFieldsMixin(object):
             definition = dict(serializer=definition)
 
         # Resolve string references to serializers
-        if isinstance(definition['serializer'], six.string_types):
+        if isinstance(definition['serializer'], str):
             reference = definition['serializer']
             serializer = utils.import_local(reference)
             assert issubclass(serializer, serializers.BaseSerializer), (
@@ -471,7 +468,7 @@ class ExpandableFieldsMixin(object):
     def _validate_max_depth(self, root_instructions):
         max_depth = self.get_max_expand_depth()
 
-        for nested_field_names in six.itervalues(root_instructions):
+        for nested_field_names in root_instructions.values():
             for nested_field_name in nested_field_names:
                 depth = len(nested_field_name.split(EXPAND_DELIMITER))
 
@@ -500,7 +497,7 @@ class ExpandableFieldsMixin(object):
         hierarchy = _get_serializer_hierarchy(self)
         instructions = {}
 
-        for method, root_nested_names in six.iteritems(root_instructions):
+        for method, root_nested_names in root_instructions.items():
             instructions[method] = {
                 n.split(EXPAND_DELIMITER)[0]
                 for n in _get_nested_field_names(hierarchy, root_nested_names)
@@ -592,7 +589,7 @@ class ExpandableFieldsMixin(object):
         ):
             return
 
-        for method, field_names in six.iteritems(instructions):
+        for method, field_names in instructions.items():
             valid_field_names = set(self.expandable_fields)
 
             # Allow unmatched full expand instructions provided that the
@@ -625,7 +622,7 @@ class ExpandableFieldsMixin(object):
         if standard_fields:
             self._validate_instructions(instructions, standard_fields)
 
-        field_iterator = six.iteritems(self.expandable_fields)
+        field_iterator = self.expandable_fields.items()
 
         # As we add <fieldname>_id fields for foreign keys, take note of any
         # that require translation to model instances in the case of an update
@@ -739,7 +736,7 @@ class OnlyFieldsMixin(object):
 
         return OrderedDict(
             (name, field)
-            for name, field in six.iteritems(fields)
+            for name, field in fields.items()
             if name in only_names
         )
 
@@ -779,7 +776,7 @@ class ExcludeFieldsMixin(object):
 
         return OrderedDict(
             (name, field)
-            for name, field in six.iteritems(fields)
+            for name, field in fields.items()
             if name not in exclude_names
         )
 

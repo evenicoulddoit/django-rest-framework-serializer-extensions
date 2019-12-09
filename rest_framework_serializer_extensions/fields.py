@@ -1,4 +1,3 @@
-import six
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.fields import Field
 from rest_framework.relations import (
@@ -37,7 +36,7 @@ class GetHashIdModelMixin(object):
                         'No "model" value passed to field "{0}"'
                         .format(type(self).__name__)
                     )
-        elif isinstance(self.model, six.string_types):
+        elif isinstance(self.model, str):
             return utils.model_from_definition(self.model)
         else:
             return self.model

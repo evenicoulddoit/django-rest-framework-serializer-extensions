@@ -1,6 +1,5 @@
 import importlib
 
-import six
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -93,7 +92,7 @@ def model_from_definition(model_definition):
     Returns:
         (django.db.models.Model)
     """
-    if isinstance(model_definition, six.string_types):
+    if isinstance(model_definition, str):
         model = import_local(model_definition)
     else:
         model = model_definition
