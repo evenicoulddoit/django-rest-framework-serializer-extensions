@@ -12,6 +12,7 @@ from rest_framework_serializer_extensions import (
     fields as custom_fields, utils
 )
 
+
 SOURCE_DELIMITER = '.'
 QUERYSET_DELIMITER = '__'
 EXPAND_DELIMITER = '__'
