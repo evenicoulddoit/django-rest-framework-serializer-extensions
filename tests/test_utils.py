@@ -1,8 +1,5 @@
-from __future__ import absolute_import
-
 from django.contrib.contenttypes.models import ContentType
 from django.test import override_settings, TestCase
-from django.utils import six
 
 from rest_framework_serializer_extensions import fields, utils
 from test_package.test_module.serializers import TestSerializer
@@ -71,7 +68,7 @@ class GetHashIdsSourceTests(TestCase):
     Unit tests for the get_hash_ids_source() utility method.
     """
     def test_unset_raises(self):
-        with six.assertRaisesRegex(self, AssertionError, 'No HASH_IDS_SOURCE'):
+        with self.assertRaisesRegex(AssertionError, 'No HASH_IDS_SOURCE'):
             utils.get_hash_ids_source()
 
     @override_settings(
@@ -169,7 +166,7 @@ class ModelFromDefinitionTests(TestCase):
         """
         An error should be raised when a non-Django model class is passed.
         """
-        with six.assertRaisesRegex(self, AssertionError, 'not a Django model'):
+        with self.assertRaisesRegex(AssertionError, 'not a Django model'):
             utils.model_from_definition(dict)
 
     def test_pass_string_as_model_definition(self):

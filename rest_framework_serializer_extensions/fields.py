@@ -1,5 +1,4 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import six
 from rest_framework.fields import Field
 from rest_framework.relations import (
     HyperlinkedIdentityField, HyperlinkedRelatedField)
@@ -37,7 +36,7 @@ class GetHashIdModelMixin(object):
                         'No "model" value passed to field "{0}"'
                         .format(type(self).__name__)
                     )
-        elif isinstance(self.model, six.string_types):
+        elif isinstance(self.model, str):
             return utils.model_from_definition(self.model)
         else:
             return self.model

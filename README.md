@@ -24,9 +24,9 @@ API, we suggest you consider switching to HashIds instead.
 ## Requirements
 Tested against:
 
-* Python (2.7, 3.6, 3.7)
-* [Django](https://github.com/django/django) (1.11, 2.1, 2.2)
-* [Django REST Framework](https://github.com/tomchristie/django-rest-framework) (3.7, 3.8, 3.9)
+* Python (3.6, 3.7, 3.8)
+* [Django](https://github.com/django/django) (2.1, 2.2, 3.0)
+* [Django REST Framework](https://github.com/tomchristie/django-rest-framework) (3.8, 3.9, 3.10)
 * [HashIds](https://github.com/davidaurelio/hashids-python) (>1.0)
 
 

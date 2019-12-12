@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from rest_framework import serializers
 
 from rest_framework_serializer_extensions.serializers import ExcludeFieldsMixin
