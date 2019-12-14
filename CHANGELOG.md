@@ -1,3 +1,7 @@
+### 2.0.0 (2019-12-14)
+* Adds support for Django 3.0
+* Drops support for Python 2 (EOL 2020)
+
 ### 1.0.0 (2019-04-21)
 * Using the `order` or `excludes` keywords retains the original field ordering
 * Bumping to first major version. Seems this package has enough usage without

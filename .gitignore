@@ -9,3 +9,4 @@ htmlcov
 coverage.xml
 *.pyc
 *.egg-info
+venv
