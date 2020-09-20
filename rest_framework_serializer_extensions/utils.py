@@ -1,32 +1,7 @@
-import importlib
-
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-
-
-def import_local(path_to_object):
-    """
-    Import an object from within the Django app.
-
-    After importing, the user should perform sanity checks on the type of
-    object that was actually imported for additional security.
-    """
-    path, name = path_to_object.rsplit('.', 1)
-
-    path_pieces = path.split('.')
-    while path_pieces:
-        if '.'.join(path_pieces) not in settings.INSTALLED_APPS:
-            path_pieces.pop()
-        else:
-            break
-
-    if not path_pieces:
-        raise AssertionError(
-            "Cannot import from outside installed apps"
-        )
-
-    return getattr(importlib.import_module(path), name)
+from django.utils.module_loading import import_string
 
 
 def get_setting(key, default=None):
@@ -45,7 +20,7 @@ def get_hash_ids_source():
     if not source_str:
         raise AssertionError('No HASH_IDS_SOURCE setting configured.')
 
-    return import_local(source_str)
+    return import_string(source_str)
 
 
 def external_id_from_model_and_internal_id(model, internal_id):
@@ -93,7 +68,7 @@ def model_from_definition(model_definition):
         (django.db.models.Model)
     """
     if isinstance(model_definition, str):
-        model = import_local(model_definition)
+        model = import_string(model_definition)
     else:
         model = model_definition
 

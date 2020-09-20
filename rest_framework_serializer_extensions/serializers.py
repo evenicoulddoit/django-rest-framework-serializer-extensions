@@ -5,6 +5,7 @@ from django.core.exceptions import FieldDoesNotExist
 from django.db.models import Prefetch
 from django.db.models.fields.related import ForeignKey
 from django.db.models.query import QuerySet
+from django.utils.module_loading import import_string
 from rest_framework import serializers
 from rest_framework.fields import empty
 
@@ -427,7 +428,7 @@ class ExpandableFieldsMixin(object):
         # Resolve string references to serializers
         if isinstance(definition['serializer'], str):
             reference = definition['serializer']
-            serializer = utils.import_local(reference)
+            serializer = import_string(reference)
             assert issubclass(serializer, serializers.BaseSerializer), (
                 "{0} is not a serializer".format(reference)
             )
