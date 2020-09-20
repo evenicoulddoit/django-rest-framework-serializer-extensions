@@ -544,6 +544,8 @@ class ExpandableFieldsMixin(object):
                 utils.model_from_definition(field_definition['id_model'])
                 .objects.all()
             )
+        if 'allow_null' in field_definition.keys():
+            kwargs['allow_null'] = field_definition['allow_null']
 
         return serializers.PrimaryKeyRelatedField(**kwargs)
 
@@ -685,7 +687,10 @@ class ExpandableFieldsMixin(object):
                 validated_data[resolved_field_name] = instance
 
                 # Translate ID field contents back to an ID
-                validated_data[id_field_name] = instance.pk
+                if instance is None:
+                    validated_data[id_field_name] = None
+                else:
+                    validated_data[id_field_name] = instance.pk
 
         return validated_data
 
