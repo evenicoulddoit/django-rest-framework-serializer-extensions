@@ -1,2 +1,0 @@
-class TestSerializer(object):
-    pass
