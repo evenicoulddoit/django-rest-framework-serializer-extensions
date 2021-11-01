@@ -3,7 +3,7 @@
 
 Full documentation: http://django-rest-framework-serializer-extensions.readthedocs.io/
 
-[![build-status-image]][travis]
+[![build-status-image]][gh-actions]
 [![coverage-status-image]][codecov]
 [![pypi-version]][pypi]
 
@@ -183,8 +183,8 @@ $ mkdocs build
 ```
 
 
-[build-status-image]: https://secure.travis-ci.org/evenicoulddoit/django-rest-framework-serializer-extensions.svg?branch=master
-[travis]: https://secure.travis-ci.org/evenicoulddoit/django-rest-framework-serializer-extensions?branch=master
+[build-status-image]: https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions/actions/workflows/test.yml/badge.svg?branch=master
+[gh-actions]: https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions/actions/workflows/test.yml?query=branch%3Amaster
 [coverage-status-image]: https://img.shields.io/codecov/c/github/evenicoulddoit/django-rest-framework-serializer-extensions/master.svg
 [codecov]: http://codecov.io/github/evenicoulddoit/django-rest-framework-serializer-extensions?branch=master
 [pypi-version]: https://img.shields.io/pypi/v/djangorestframework-serializer-extensions.svg
