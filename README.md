@@ -3,7 +3,7 @@
 
 Full documentation: http://django-rest-framework-serializer-extensions.readthedocs.io/
 
-[![build-status-image]][travis]
+[![build-status-image]][gh-actions]
 [![coverage-status-image]][codecov]
 [![pypi-version]][pypi]
 
@@ -143,13 +143,13 @@ in much the same way.
 Install testing requirements.
 
 ```bash
-$ pip install -r requirements.txt
+$ pip install -e .[test]
 ```
 
-Run with runtests.
+Run with pytest
 
 ```bash
-$ ./runtests.py
+$ pytest
 ```
 
 You can also use the excellent
@@ -163,10 +163,10 @@ $ tox
 
 
 ## Documentation
-To build the documentation, you’ll need to install `mkdocs`.
+To build the documentation, you’ll need to install `mkdocs`. These are included in the development extras:
 
 ```bash
-$ pip install mkdocs
+$ pip install -e .[dev]
 ```
 
 To preview the documentation:
@@ -184,7 +184,7 @@ $ mkdocs build
 
 
 [build-status-image]: https://secure.travis-ci.org/evenicoulddoit/django-rest-framework-serializer-extensions.svg?branch=master
-[travis]: https://secure.travis-ci.org/evenicoulddoit/django-rest-framework-serializer-extensions?branch=master
+[gh-actions]: https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions/actions/workflows/test.yml?query=branch%3Amaster
 [coverage-status-image]: https://img.shields.io/codecov/c/github/evenicoulddoit/django-rest-framework-serializer-extensions/master.svg
 [codecov]: http://codecov.io/github/evenicoulddoit/django-rest-framework-serializer-extensions?branch=master
 [pypi-version]: https://img.shields.io/pypi/v/djangorestframework-serializer-extensions.svg

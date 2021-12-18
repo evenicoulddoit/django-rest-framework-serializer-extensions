@@ -8,6 +8,7 @@ class SerializerExtensionsAPIViewMixin(object):
     """
     Mixin to provide support for Serializer Extensions within API views.
     """
+
     def get_queryset(self):
         """
         Automatically optimize the queryset depending on the expand context.
@@ -21,16 +22,15 @@ class SerializerExtensionsAPIViewMixin(object):
 
     def get_auto_optimized_queryset(self, qs):
         context = self.get_extensions_mixin_context()
-        expand = context['expand'] | context['expand_id_only']
+        expand = context["expand"] | context["expand_id_only"]
         serializer = self.get_serializer_class()(context=dict(expand=expand))
         qs = serializer.auto_optimize(qs)
         return qs
 
     def get_serializer_context(self):
-        context = (
-            super(SerializerExtensionsAPIViewMixin, self)
-            .get_serializer_context()
-        )
+        context = super(
+            SerializerExtensionsAPIViewMixin, self
+        ).get_serializer_context()
         context.update(self.get_extensions_mixin_context())
         return context
 
@@ -41,7 +41,7 @@ class SerializerExtensionsAPIViewMixin(object):
         try:
             return self.extensions_query_params_enabled
         except AttributeError:
-            return utils.get_setting('QUERY_PARAMS_ENABLED', default=True)
+            return utils.get_setting("QUERY_PARAMS_ENABLED", default=True)
 
     def get_extensions_auto_optimize(self):
         """
@@ -50,7 +50,7 @@ class SerializerExtensionsAPIViewMixin(object):
         try:
             return self.extensions_auto_optimize
         except AttributeError:
-            return utils.get_setting('AUTO_OPTIMIZE', default=False)
+            return utils.get_setting("AUTO_OPTIMIZE", default=False)
 
     def get_extensions_mixin_context(self):
         """
@@ -67,15 +67,15 @@ class SerializerExtensionsAPIViewMixin(object):
 
         params_enabled = self.get_extensions_query_params_enabled()
 
-        for field in ['expand', 'expand_id_only', 'exclude', 'only']:
-            field_names = getattr(self, 'extensions_{0}'.format(field), [])
+        for field in ["expand", "expand_id_only", "exclude", "only"]:
+            field_names = getattr(self, "extensions_{0}".format(field), [])
 
             if params_enabled:
                 query_params = self.request.query_params.getlist(field)
 
                 if query_params:
-                    if len(query_params) == 1 and ',' in query_params[0]:
-                        field_names = query_params[0].split(',')
+                    if len(query_params) == 1 and "," in query_params[0]:
+                        field_names = query_params[0].split(",")
                     else:
                         field_names = query_params
 
@@ -88,6 +88,7 @@ class ExternalIdViewMixin(object):
     """
     Allow external IDs to be used for generic API views.
     """
+
     def get_object(self):
         """
         Extend the vanilla get_object() method to retrieve by external_id.
@@ -102,17 +103,16 @@ class ExternalIdViewMixin(object):
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
 
         assert lookup_url_kwarg in self.kwargs, (
-            'Expected view %s to be called with a URL keyword argument '
+            "Expected view %s to be called with a URL keyword argument "
             'named "%s". Fix your URL conf, or set the `.lookup_field` '
-            'attribute on the view correctly.' %
-            (self.__class__.__name__, lookup_url_kwarg)
+            "attribute on the view correctly."
+            % (self.__class__.__name__, lookup_url_kwarg)
         )
 
-        assert self.lookup_field == 'pk', (
-            'View %s cannot have a custom lookup_field value, as the '
-            'ExternalIdViewMixin expects to retrieve the object by its '
-            'primary key.' %
-            (self.__class__.__name__)
+        assert self.lookup_field == "pk", (
+            "View %s cannot have a custom lookup_field value, as the "
+            "ExternalIdViewMixin expects to retrieve the object by its "
+            "primary key." % (self.__class__.__name__)
         )
 
         try:

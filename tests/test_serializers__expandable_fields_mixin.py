@@ -3,28 +3,27 @@ from rest_framework import serializers
 
 from rest_framework_serializer_extensions import utils
 from rest_framework_serializer_extensions.serializers import (
-    ExpandableFieldsMixin
+    ExpandableFieldsMixin,
 )
 from tests import models
 from tests.base import SerializerMixinTestCase
 
-
 """
 START TEST SERIALIZERS
 """
-MODULE = 'tests.test_serializers__expandable_fields_mixin'
+MODULE = "tests.test_serializers__expandable_fields_mixin"
 
 
 class ManufacturerTestSerializer(
     ExpandableFieldsMixin, serializers.ModelSerializer
 ):
     class Meta:
-        fields = ('id', 'name')
+        fields = ("id", "name")
         model = models.Manufacturer
         expandable_fields = dict(
             models=dict(
-                serializer='{0}.CarModelTestSerializer'.format(MODULE),
-                many=True
+                serializer="{0}.CarModelTestSerializer".format(MODULE),
+                many=True,
             )
         )
 
@@ -33,27 +32,25 @@ class CarModelTestSerializer(
     ExpandableFieldsMixin, serializers.ModelSerializer
 ):
     class Meta:
-        fields = ('id', 'name')
+        fields = ("id", "name")
         model = models.CarModel
         expandable_fields = dict(
             manufacturer=ManufacturerTestSerializer,
             skus=dict(
-                serializer='{0}.SkuTestSerializer'.format(MODULE),
-                many=True
-            )
+                serializer="{0}.SkuTestSerializer".format(MODULE), many=True
+            ),
         )
 
 
 class SkuTestSerializer(ExpandableFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = models.Sku
-        fields = ('id', 'variant')
+        fields = ("id", "variant")
         expandable_fields = dict(
             model=CarModelTestSerializer,
             owners=dict(
-                serializer='{0}.OwnerTestSerializer'.format(MODULE),
-                many=True,
-            )
+                serializer="{0}.OwnerTestSerializer".format(MODULE), many=True,
+            ),
         )
 
 
@@ -61,7 +58,7 @@ class OrganizationTestSerializer(
     ExpandableFieldsMixin, serializers.ModelSerializer
 ):
     class Meta:
-        fields = ('id', 'name')
+        fields = ("id", "name")
         model = models.Organization
 
 
@@ -70,24 +67,21 @@ class OwnerIdentityTestSerializer(
 ):
     class Meta:
         model = models.Owner
-        fields = ('email',)
+        fields = ("email",)
 
 
 class OwnerTestSerializer(ExpandableFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = models.Owner
-        fields = ('id', 'name')
+        fields = ("id", "name")
         expandable_fields = dict(
             identities=dict(
                 serializer=OwnerIdentityTestSerializer,
-                source='*',
-                id_source=False
+                source="*",
+                id_source=False,
             ),
-            organization='{0}.OrganizationTestSerializer'.format(MODULE),
-            cars=dict(
-                serializer=SkuTestSerializer,
-                many=True
-            )
+            organization="{0}.OrganizationTestSerializer".format(MODULE),
+            cars=dict(serializer=SkuTestSerializer, many=True),
         )
 
 
@@ -98,7 +92,7 @@ class OwnerWithCarsTestSerializer(
 
     class Meta:
         model = models.Owner
-        fields = ('id', 'name', 'cars')
+        fields = ("id", "name", "cars")
 
 
 class OwnerWithMethodFieldTestSerializer(
@@ -106,10 +100,8 @@ class OwnerWithMethodFieldTestSerializer(
 ):
     class Meta:
         model = models.Owner
-        fields = ('id', 'name')
-        expandable_fields = dict(
-            cars=serializers.SerializerMethodField
-        )
+        fields = ("id", "name")
+        expandable_fields = dict(cars=serializers.SerializerMethodField)
 
     def get_cars(self, obj):
         return [sku.variant for sku in obj.cars.all()]
@@ -125,13 +117,14 @@ class OwnerWithCustomIdSourceTestSerializer(
     instances which have a reverse ForeignKey (i.e. the ForeignKey row is
     stored on the related model's table).
     """
+
     class Meta:
         model = models.Owner
-        fields = ('id', 'name')
+        fields = ("id", "name")
         expandable_fields = dict(
             organization=dict(
                 serializer=OrganizationTestSerializer,
-                id_source='organization.pk'
+                id_source="organization.pk",
             )
         )
 
@@ -140,12 +133,11 @@ class CarModelWithWritableManufacturerTestSerializer(
     ExpandableFieldsMixin, serializers.ModelSerializer
 ):
     class Meta:
-        fields = ('id', 'name')
+        fields = ("id", "name")
         model = models.CarModel
         expandable_fields = dict(
             manufacturer=dict(
-                serializer=ManufacturerTestSerializer,
-                read_only=False
+                serializer=ManufacturerTestSerializer, read_only=False
             ),
         )
 
@@ -157,19 +149,19 @@ class NonModelTestSerializer(ExpandableFieldsMixin, serializers.Serializer):
         return False
 
     def get_sku(self, obj):
-        sku = models.Sku.objects.get(variant='P100D')
+        sku = models.Sku.objects.get(variant="P100D")
         serializer = SkuTestSerializer(instance=sku, context=self.context)
-        serializer.bind('sku', self)
+        serializer.bind("sku", self)
         return serializer.data
 
     class Meta:
         expandable_fields = dict(
             non_model=dict(
-                serializer='{0}.NonModelTestSerializer'.format(MODULE),
-                source='*',
-                id_source=False
+                serializer="{0}.NonModelTestSerializer".format(MODULE),
+                source="*",
+                id_source=False,
             ),
-            sku=serializers.SerializerMethodField
+            sku=serializers.SerializerMethodField,
         )
 
 
@@ -185,14 +177,12 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
     The mixin should allow complex, deferred fields, to be serialized only
     when required.
     """
+
     def serialize(self, **context):
         """
         Return the serialized car with the given context applied
         """
-        return (
-            OwnerTestSerializer(self.owner_tyrell, context=context)
-            .data
-        )
+        return OwnerTestSerializer(self.owner_tyrell, context=context).data
 
     def expand_instance_id(self, instance):
         return instance.pk
@@ -211,8 +201,8 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 name=self.owner_tyrell.name,
                 organization_id=self.expand_instance_id(
                     self.organization_ecorp
-                )
-            )
+                ),
+            ),
         )
 
     def test_expand_foreign_key(self):
@@ -222,7 +212,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         Both the ID field and the full serialized instance should be included.
         """
         self.assertDictEqual(
-            self.serialize(expand={'organization'}),
+            self.serialize(expand={"organization"}),
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
@@ -231,9 +221,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 ),
                 organization=dict(
                     id=self.organization_ecorp.pk,
-                    name=self.organization_ecorp.name
-                )
-            )
+                    name=self.organization_ecorp.name,
+                ),
+            ),
         )
 
     def test_full_expand_one_to_many_key(self):
@@ -241,7 +231,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         Test that fully expanding a OneToMany relation works as expected.
         """
         self.assertDictEqual(
-            self.serialize(expand={'cars'}),
+            self.serialize(expand={"cars"}),
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
@@ -252,10 +242,12 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                     dict(
                         id=self.sku_p100d.pk,
                         variant=self.sku_p100d.variant,
-                        model_id=self.expand_instance_id(self.carmodel_model_s)
+                        model_id=self.expand_instance_id(
+                            self.carmodel_model_s
+                        ),
                     )
-                ]
-            )
+                ],
+            ),
         )
 
     def test_id_only_expand_one_to_many_key(self):
@@ -266,7 +258,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         identical instances are expected to be returned.
         """
         self.assertDictEqual(
-            self.serialize(expand_id_only={'cars'}),
+            self.serialize(expand_id_only={"cars"}),
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
@@ -274,7 +266,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                     self.organization_ecorp
                 ),
                 cars=[self.expand_instance_id(self.sku_p100d)],
-            )
+            ),
         )
 
     def test_expand_further_info_serializer(self):
@@ -286,17 +278,15 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         the ID field.
         """
         self.assertDictEqual(
-            self.serialize(expand={'identities'}),
+            self.serialize(expand={"identities"}),
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
                 organization_id=self.expand_instance_id(
                     self.organization_ecorp
                 ),
-                identities=dict(
-                    email=self.owner_tyrell.email
-                )
-            )
+                identities=dict(email=self.owner_tyrell.email),
+            ),
         )
 
     def test_multiple_expansion(self):
@@ -304,19 +294,17 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         Test that expanding multiple fields works as expected.
         """
         self.assertDictEqual(
-            self.serialize(expand={'identities', 'organization', 'cars'}),
+            self.serialize(expand={"identities", "organization", "cars"}),
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
                 organization_id=self.expand_instance_id(
                     self.organization_ecorp
                 ),
-                identities=dict(
-                    email=self.owner_tyrell.email
-                ),
+                identities=dict(email=self.owner_tyrell.email),
                 organization=dict(
                     id=self.organization_ecorp.pk,
-                    name=self.organization_ecorp.name
+                    name=self.organization_ecorp.name,
                 ),
                 cars=[
                     dict(
@@ -324,10 +312,10 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                         variant=self.sku_p100d.variant,
                         model_id=self.expand_instance_id(
                             self.carmodel_model_s
-                        )
+                        ),
                     )
                 ],
-            )
+            ),
         )
 
     def test_nested_expansion(self):
@@ -335,7 +323,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         Test that nested expansion works as expected.
         """
         self.assertDictEqual(
-            self.serialize(expand={'cars__model__manufacturer'}),
+            self.serialize(expand={"cars__model__manufacturer"}),
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
@@ -357,12 +345,12 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                             ),
                             manufacturer=dict(
                                 id=self.manufacturer_tesla.pk,
-                                name=self.manufacturer_tesla.name
-                            )
-                        )
+                                name=self.manufacturer_tesla.name,
+                            ),
+                        ),
                     )
-                ]
-            )
+                ],
+            ),
         )
 
     def test_nested_expansion_with_standard_fields(self):
@@ -375,7 +363,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         by the mixin in order to expand the child serializer's "model" field.
         """
         serialized = OwnerWithCarsTestSerializer(
-            self.owner_tyrell, context=dict(expand={'cars__model'})
+            self.owner_tyrell, context=dict(expand={"cars__model"})
         )
 
         self.assertDictEqual(
@@ -396,10 +384,10 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                             manufacturer_id=self.expand_instance_id(
                                 self.manufacturer_tesla
                             ),
-                        )
+                        ),
                     )
-                ]
-            )
+                ],
+            ),
         )
 
     def test_custom_id_source_unexpanded(self):
@@ -413,8 +401,8 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 name=self.owner_tyrell.name,
                 organization_id=self.expand_instance_id(
                     self.organization_ecorp
-                )
-            )
+                ),
+            ),
         )
 
     def test_custom_id_source_expanded(self):
@@ -422,7 +410,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         Providing a custom 'id_source' should not affect expansion
         """
         serialized = OwnerWithCustomIdSourceTestSerializer(
-            self.owner_tyrell, context=dict(expand={'organization'})
+            self.owner_tyrell, context=dict(expand={"organization"})
         ).data
 
         self.assertDictEqual(
@@ -435,9 +423,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 ),
                 organization=dict(
                     id=self.organization_ecorp.pk,
-                    name=self.organization_ecorp.name
-                )
-            )
+                    name=self.organization_ecorp.name,
+                ),
+            ),
         )
 
     def test_method_field_serializer_unexpanded(self):
@@ -446,10 +434,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         """
         self.assertDictEqual(
             OwnerWithMethodFieldTestSerializer(self.owner_tyrell).data,
-            dict(
-                id=self.owner_tyrell.pk,
-                name=self.owner_tyrell.name,
-            )
+            dict(id=self.owner_tyrell.pk, name=self.owner_tyrell.name,),
         )
 
     def test_method_field_serializer_expanded(self):
@@ -457,7 +442,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         Unexpanded SerializerMethodFields never have an ID source.
         """
         serialized = OwnerWithMethodFieldTestSerializer(
-            self.owner_tyrell, context=dict(expand={'cars'})
+            self.owner_tyrell, context=dict(expand={"cars"})
         ).data
 
         self.assertDictEqual(
@@ -465,8 +450,8 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
-                cars=[self.sku_p100d.variant]
-            )
+                cars=[self.sku_p100d.variant],
+            ),
         )
 
     def test_custom_id_field(self):
@@ -475,6 +460,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
 
         A SerializerMethodField is passed with the object as it's source.
         """
+
         class CustomIdSerializer(OwnerTestSerializer):
             def get_organization_id(self, owner):
                 return "{0}-{1}".format(owner.name, owner.organization.name)
@@ -487,8 +473,8 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 name=self.owner_tyrell.name,
                 organization_id="{0}-{1}".format(
                     self.owner_tyrell.name, self.organization_ecorp.name
-                )
-            )
+                ),
+            ),
         )
 
     def test_custom_id_only_field(self):
@@ -497,13 +483,13 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
 
         A SerializerMethodField is passed with the object as it's source.
         """
+
         class CustomIdSerializer(OwnerTestSerializer):
             def get_cars_id_only(self, owner):
                 return [car.variant for car in owner.cars.all()]
 
         serialized = CustomIdSerializer(
-            self.owner_tyrell,
-            context=dict(expand_id_only={'cars'})
+            self.owner_tyrell, context=dict(expand_id_only={"cars"})
         ).data
 
         self.assertDictEqual(
@@ -514,8 +500,8 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 organization_id=self.expand_instance_id(
                     self.organization_ecorp
                 ),
-                cars=[self.sku_p100d.variant]
-            )
+                cars=[self.sku_p100d.variant],
+            ),
         )
 
     def test_custom_source_id_only_field(self):
@@ -524,19 +510,17 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
 
         A SerializerMethodField is passed with the object as it's source.
         """
+
         class CustomIdSourceSerializer(OwnerTestSerializer):
             class Meta(OwnerTestSerializer.Meta):
                 expandable_fields = dict(
                     car_skus=dict(
-                        serializer=SkuTestSerializer,
-                        many=True,
-                        source='cars'
+                        serializer=SkuTestSerializer, many=True, source="cars"
                     )
                 )
 
         serialized = CustomIdSourceSerializer(
-            self.owner_tyrell,
-            context=dict(expand_id_only={'car_skus'})
+            self.owner_tyrell, context=dict(expand_id_only={"car_skus"})
         ).data
 
         self.assertDictEqual(
@@ -544,8 +528,8 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
-                car_skus=[self.expand_instance_id(self.sku_p100d)]
-            )
+                car_skus=[self.expand_instance_id(self.sku_p100d)],
+            ),
         )
 
     def test_nested_id_only_expansion(self):
@@ -553,7 +537,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         Nested ID expansion implies full expansion until the last node.
         """
         self.assertDictEqual(
-            self.serialize(expand_id_only={'cars__model__skus'}),
+            self.serialize(expand_id_only={"cars__model__skus"}),
             dict(
                 id=self.owner_tyrell.pk,
                 name=self.owner_tyrell.name,
@@ -575,12 +559,12 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                             ),
                             skus=[
                                 self.expand_instance_id(self.sku_p100d),
-                                self.expand_instance_id(self.sku_70)
-                            ]
-                        )
+                                self.expand_instance_id(self.sku_70),
+                            ],
+                        ),
                     )
-                ]
-            )
+                ],
+            ),
         )
 
     def test_exceed_default_max_depth(self):
@@ -588,63 +572,55 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         Test that a max expansion depth of 3 is set on the serializer.
         """
         with self.assertRaises(ValueError):
-            self.serialize(expand={'cars__model__manufacturer__models'})
+            self.serialize(expand={"cars__model__manufacturer__models"})
 
     @override_settings(
-        REST_FRAMEWORK=dict(
-            SERIALIZER_EXTENSIONS=dict(
-                MAX_EXPAND_DEPTH=4
-            )
-        )
+        REST_FRAMEWORK=dict(SERIALIZER_EXTENSIONS=dict(MAX_EXPAND_DEPTH=4))
     )
     def test_max_depth_setting_below_value(self):
         """
         Test that the MAX_EXPAND_DEPTH setting allows expansion as expected.
         """
-        self.serialize(expand={'cars__model__manufacturer__models'})
+        self.serialize(expand={"cars__model__manufacturer__models"})
 
     @override_settings(
-        REST_FRAMEWORK=dict(
-            SERIALIZER_EXTENSIONS=dict(
-                MAX_EXPAND_DEPTH=2
-            )
-        )
+        REST_FRAMEWORK=dict(SERIALIZER_EXTENSIONS=dict(MAX_EXPAND_DEPTH=2))
     )
     def test_max_depth_setting_above_value(self):
         """
         Test that the MAX_EXPAND_DEPTH setting prevents expansion as expected.
         """
         with self.assertRaises(ValueError):
-            self.serialize(expand={'cars__model__manufacturer__models'})
+            self.serialize(expand={"cars__model__manufacturer__models"})
 
     def test_one_to_one_field_id_only_expansion(self):
         """
         Attempting to expand a *-to-one field by it's ID only should fail.
         """
         with self.assertRaises(ValueError):
-            self.serialize(expand_id_only={'organization'})
+            self.serialize(expand_id_only={"organization"})
 
     def test_unmatched_root_field_not_expandable(self):
         with self.assertRaises(ValueError):
-            self.serialize(expand={'not_found'})
+            self.serialize(expand={"not_found"})
 
     def test_unmatched_nested_field_not_expandable(self):
         with self.assertRaises(ValueError):
-            self.serialize(expand={'organization__not_found'})
+            self.serialize(expand={"organization__not_found"})
 
     def test_unmatched_root_field_not_id_expandable(self):
         with self.assertRaises(ValueError):
-            self.serialize(expand_id_only={'not_found'})
+            self.serialize(expand_id_only={"not_found"})
 
     def test_unmatched_nested_field_not_id_expandable(self):
         with self.assertRaises(ValueError):
-            self.serialize(expand_id_only={'organization__not_found'})
+            self.serialize(expand_id_only={"organization__not_found"})
 
     def test_can_ignore_matching_validation_through_context(self):
         self.assertDictEqual(
             self.serialize(
-                expand={'organization', 'not_found'},
-                validate_expand_instructions=False
+                expand={"organization", "not_found"},
+                validate_expand_instructions=False,
             ),
             dict(
                 id=self.owner_tyrell.pk,
@@ -654,9 +630,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 ),
                 organization=dict(
                     id=self.organization_ecorp.pk,
-                    name=self.organization_ecorp.name
-                )
-            )
+                    name=self.organization_ecorp.name,
+                ),
+            ),
         )
 
     def test_can_ignore_matching_validation_through_meta(self):
@@ -666,7 +642,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
 
         serialized = IgnoreSerializer(
             self.owner_tyrell,
-            context=dict(expand={'organization', 'not_found'})
+            context=dict(expand={"organization", "not_found"}),
         ).data
 
         self.assertDictEqual(
@@ -679,9 +655,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 ),
                 organization=dict(
                     id=self.organization_ecorp.pk,
-                    name=self.organization_ecorp.name
-                )
-            )
+                    name=self.organization_ecorp.name,
+                ),
+            ),
         )
 
     def test_can_ignore_matching_validation_through_method(self):
@@ -691,7 +667,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
 
         serialized = IgnoreSerializer(
             self.owner_tyrell,
-            context=dict(expand={'organization', 'not_found'})
+            context=dict(expand={"organization", "not_found"}),
         ).data
 
         self.assertDictEqual(
@@ -704,9 +680,9 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 ),
                 organization=dict(
                     id=self.organization_ecorp.pk,
-                    name=self.organization_ecorp.name
-                )
-            )
+                    name=self.organization_ecorp.name,
+                ),
+            ),
         )
 
     def test_deserialize_read_only_id_field(self):
@@ -715,14 +691,14 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         """
         serializer = CarModelTestSerializer(
             data=dict(
-                name='Ka',
+                name="Ka",
                 manufacturer_id=(
                     self.expand_instance_id(self.manufacturer_tesla)
-                )
+                ),
             )
         )
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(dict(name='Ka'), serializer.validated_data)
+        self.assertEqual(dict(name="Ka"), serializer.validated_data)
 
     def test_deserialize_writable_field(self):
         """
@@ -730,20 +706,20 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         """
         serializer = CarModelWithWritableManufacturerTestSerializer(
             data=dict(
-                name='Ka',
+                name="Ka",
                 manufacturer_id=(
                     self.expand_instance_id(self.manufacturer_tesla)
-                )
+                ),
             )
         )
         self.assertTrue(serializer.is_valid())
         self.assertEqual(
             dict(
-                name='Ka',
+                name="Ka",
                 manufacturer_id=self.manufacturer_tesla.pk,
                 manufacturer_id_resolved=self.manufacturer_tesla,
             ),
-            serializer.validated_data
+            serializer.validated_data,
         )
 
     def test_writable_field_required(self):
@@ -751,16 +727,16 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         If a field is writable, it can be required when deserializing.
         """
         serializer = CarModelWithWritableManufacturerTestSerializer(
-            data=dict(name='Ka')
+            data=dict(name="Ka")
         )
         self.assertFalse(serializer.is_valid())
-        self.assertTrue('manufacturer_id' in serializer.errors)
+        self.assertTrue("manufacturer_id" in serializer.errors)
 
     def test_read_only_field_not_required(self):
         """
         If a field is read only, it is not required when deserializing.
         """
-        serializer = CarModelTestSerializer(data=dict(name='Ka'))
+        serializer = CarModelTestSerializer(data=dict(name="Ka"))
         self.assertTrue(serializer.is_valid())
 
     def test_unexpanded_non_model_serializer(self):
@@ -775,25 +751,18 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         Non-model to non-model expansion should work as expected.
         """
         serializer = NonModelTestSerializer(
-            {}, context=dict(expand={'non_model'})
+            {}, context=dict(expand={"non_model"})
         )
         self.assertDictEqual(
             serializer.data,
-            dict(
-                is_model=False,
-                non_model=dict(
-                    is_model=False
-                )
-            )
+            dict(is_model=False, non_model=dict(is_model=False)),
         )
 
     def test_expanded_non_model_serializer_with_model_serializer(self):
         """
         Non-model to model expansion should work as expected.
         """
-        serializer = NonModelTestSerializer(
-            {}, context=dict(expand={'sku'})
-        )
+        serializer = NonModelTestSerializer({}, context=dict(expand={"sku"}))
         self.assertDictEqual(
             serializer.data,
             dict(
@@ -801,17 +770,16 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
                 sku=dict(
                     id=self.sku_p100d.pk,
                     variant=self.sku_p100d.variant,
-                    model_id=self.expand_instance_id(self.carmodel_model_s)
-                )
-            )
+                    model_id=self.expand_instance_id(self.carmodel_model_s),
+                ),
+            ),
         )
 
 
 @override_settings(
     REST_FRAMEWORK=dict(
         SERIALIZER_EXTENSIONS=dict(
-            USE_HASH_IDS=True,
-            HASH_IDS_SOURCE='tests.base.TEST_HASH_IDS'
+            USE_HASH_IDS=True, HASH_IDS_SOURCE="tests.base.TEST_HASH_IDS"
         )
     )
 )
@@ -824,6 +792,7 @@ class HashidsExpandableFieldsSerializerMixinTests(
     Uses the same test cases as before, but expected HashIds to be used
     whenever the mixin has expanded fields.
     """
+
     def expand_instance_id(self, instance):
         return utils.external_id_from_model_and_internal_id(
             type(instance), instance.pk

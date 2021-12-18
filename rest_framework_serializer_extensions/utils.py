@@ -6,7 +6,7 @@ from django.utils.module_loading import import_string
 
 def get_setting(key, default=None):
     try:
-        return settings.REST_FRAMEWORK['SERIALIZER_EXTENSIONS'][key]
+        return settings.REST_FRAMEWORK["SERIALIZER_EXTENSIONS"][key]
     except (AttributeError, KeyError):
         return default
 
@@ -15,10 +15,10 @@ def get_hash_ids_source():
     """
     Return the HashIds instance used to (de)serialize external IDs.
     """
-    source_str = get_setting('HASH_IDS_SOURCE')
+    source_str = get_setting("HASH_IDS_SOURCE")
 
     if not source_str:
-        raise AssertionError('No HASH_IDS_SOURCE setting configured.')
+        raise AssertionError("No HASH_IDS_SOURCE setting configured.")
 
     return import_string(source_str)
 
@@ -42,7 +42,8 @@ def internal_id_from_model_and_external_id(model, external_id):
     """
     try:
         content_type_id, instance_id = get_hash_ids_source().decode(
-            external_id)
+            external_id
+        )
     except (TypeError, ValueError):
         raise model.DoesNotExist
 
