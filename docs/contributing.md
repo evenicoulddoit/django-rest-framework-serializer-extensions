@@ -7,7 +7,7 @@ To contribute to Serializer Extensions, please:
 * Clone the repository
 * Ensure your changes are Flake8 compliant
 * Provide tests to support your changes
-* Ensure all tests pass by calling `./runtests.py`, or
+* Ensure all tests pass by calling `pytest`, or
   [`tox`](http://tox.readthedocs.org/en/latest/) to run tests across all
   supported environments
 * Ensure the documentation remains up to date

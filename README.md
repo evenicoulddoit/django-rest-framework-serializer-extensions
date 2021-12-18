@@ -146,10 +146,10 @@ Install testing requirements.
 $ pip install -e .[test]
 ```
 
-Run with runtests.
+Run with pytest
 
 ```bash
-$ ./runtests.py
+$ pytest
 ```
 
 You can also use the excellent
