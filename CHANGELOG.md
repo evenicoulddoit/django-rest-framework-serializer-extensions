@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Introduced `black` and `isort` to standardise coding style
 * Restructures requirements to create single source of truth
 * Drops `./runtest` executable, `pytest` now direct route
+* Drops `mock` dependency, in favour of `unittest.mock`
 
 ## [2.0.1] - 2020-09-20
 ### Fixed
