@@ -1,8 +1,9 @@
+from unittest.mock import patch
+
 import django
 from django.db import connection
 from django.http import QueryDict
 from django.test import override_settings, RequestFactory
-from mock import patch
 from rest_framework.fields import SerializerMethodField
 from test_plus.test import CBVTestCase
 
