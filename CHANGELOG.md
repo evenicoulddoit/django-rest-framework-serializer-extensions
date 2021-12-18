@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+* Switches from Travis CI to Github Actions
 * Introduced `black` and `isort` to standardise coding style
 * Restructures requirements to create single source of truth
 * Drops `./runtest` executable, `pytest` now direct route

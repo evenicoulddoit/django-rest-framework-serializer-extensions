@@ -5,8 +5,8 @@
     serializers
   </strong>
   <div class="index__badges">
-    <a href="http://travis-ci.org/evenicoulddoit/django-rest-framework-serializer-extensions">
-      <img src="https://travis-ci.org/evenicoulddoit/django-rest-framework-serializer-extensions.svg?branch=master">
+    <a href="https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions/actions/workflows/test.yml?query=branch%3Amaster">
+      <img src="https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions/actions/workflows/test.yml/badge.svg?branch=master">
     </a>
     <a href="http://codecov.io/github/evenicoulddoit/django-rest-framework-serializer-extensions?branch=master">
       <img src="https://img.shields.io/codecov/c/github/evenicoulddoit/django-rest-framework-serializer-extensions/master.svg">
