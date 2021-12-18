@@ -3,57 +3,58 @@ def pytest_configure():
 
     settings.configure(
         DEBUG_PROPAGATE_EXCEPTIONS=True,
-        DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3',
-                               'NAME': ':memory:'}},
+        DATABASES={
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": ":memory:",
+            }
+        },
         SITE_ID=1,
-        SECRET_KEY='not very secret in tests',
+        SECRET_KEY="not very secret in tests",
         USE_I18N=True,
         USE_L10N=True,
-        STATIC_URL='/static/',
-        ROOT_URLCONF='tests.urls',
+        STATIC_URL="/static/",
+        ROOT_URLCONF="tests.urls",
         TEMPLATE_LOADERS=(
-            'django.template.loaders.filesystem.Loader',
-            'django.template.loaders.app_directories.Loader',
+            "django.template.loaders.filesystem.Loader",
+            "django.template.loaders.app_directories.Loader",
         ),
         MIDDLEWARE_CLASSES=(
-            'django.middleware.common.CommonMiddleware',
-            'django.contrib.sessions.middleware.SessionMiddleware',
-            'django.middleware.csrf.CsrfViewMiddleware',
-            'django.contrib.auth.middleware.AuthenticationMiddleware',
-            'django.contrib.messages.middleware.MessageMiddleware',
+            "django.middleware.common.CommonMiddleware",
+            "django.contrib.sessions.middleware.SessionMiddleware",
+            "django.middleware.csrf.CsrfViewMiddleware",
+            "django.contrib.auth.middleware.AuthenticationMiddleware",
+            "django.contrib.messages.middleware.MessageMiddleware",
         ),
         INSTALLED_APPS=(
-            'django.contrib.auth',
-            'django.contrib.contenttypes',
-            'django.contrib.sessions',
-            'django.contrib.sites',
-            'django.contrib.messages',
-            'django.contrib.staticfiles',
-
-            'rest_framework',
-            'rest_framework.authtoken',
-            'rest_framework_serializer_extensions',
-            'tests',
+            "django.contrib.auth",
+            "django.contrib.contenttypes",
+            "django.contrib.sessions",
+            "django.contrib.sites",
+            "django.contrib.messages",
+            "django.contrib.staticfiles",
+            "rest_framework",
+            "rest_framework.authtoken",
+            "rest_framework_serializer_extensions",
+            "tests",
         ),
         PASSWORD_HASHERS=(
-            'django.contrib.auth.hashers.SHA1PasswordHasher',
-            'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-            'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
-            'django.contrib.auth.hashers.BCryptPasswordHasher',
-            'django.contrib.auth.hashers.MD5PasswordHasher',
-            'django.contrib.auth.hashers.CryptPasswordHasher',
+            "django.contrib.auth.hashers.SHA1PasswordHasher",
+            "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+            "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+            "django.contrib.auth.hashers.BCryptPasswordHasher",
+            "django.contrib.auth.hashers.MD5PasswordHasher",
+            "django.contrib.auth.hashers.CryptPasswordHasher",
         ),
     )
 
     try:
-        import oauth_provider  # NOQA
         import oauth2  # NOQA
+        import oauth_provider  # NOQA
     except ImportError:
         pass
     else:
-        settings.INSTALLED_APPS += (
-            'oauth_provider',
-        )
+        settings.INSTALLED_APPS += ("oauth_provider",)
 
     try:
         import provider  # NOQA
@@ -61,8 +62,8 @@ def pytest_configure():
         pass
     else:
         settings.INSTALLED_APPS += (
-            'provider',
-            'provider.oauth2',
+            "provider",
+            "provider.oauth2",
         )
 
     # guardian is optional
@@ -73,15 +74,14 @@ def pytest_configure():
     else:
         settings.ANONYMOUS_USER_ID = -1
         settings.AUTHENTICATION_BACKENDS = (
-            'django.contrib.auth.backends.ModelBackend',
-            'guardian.backends.ObjectPermissionBackend',
+            "django.contrib.auth.backends.ModelBackend",
+            "guardian.backends.ObjectPermissionBackend",
         )
-        settings.INSTALLED_APPS += (
-            'guardian',
-        )
+        settings.INSTALLED_APPS += ("guardian",)
 
     try:
         import django
+
         django.setup()
     except AttributeError:
         pass

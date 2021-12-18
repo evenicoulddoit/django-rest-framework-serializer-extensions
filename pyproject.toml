@@ -1,0 +1,10 @@
+[tool.black]
+line-length = 79
+
+[tool.isort]
+multi_line_output = 3
+known_first_party = "rest_framework_serializer_extensions"
+include_trailing_comma = true
+no_lines_before = "LOCALFOLDER"
+combine_as_imports = true
+order_by_type = false

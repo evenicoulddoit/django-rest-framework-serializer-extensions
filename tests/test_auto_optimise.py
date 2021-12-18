@@ -3,13 +3,14 @@ from django.db import connection
 from django.http import QueryDict
 from django.test import override_settings, RequestFactory
 from mock import patch
-from test_plus.test import CBVTestCase
 from rest_framework.fields import SerializerMethodField
+from test_plus.test import CBVTestCase
 
 from tests import (
-    models as test_models, serializers as test_serializers,
-    views as test_views)
-
+    models as test_models,
+    serializers as test_serializers,
+    views as test_views,
+)
 
 # TODO: Replace related set assignment with .set() when Django 1.10+ support
 
@@ -18,6 +19,7 @@ class QueryCounter(object):
     """
     A simple ContextManager to keep track of the number of DB queries made.
     """
+
     def __init__(self):
         self.count = 0
 
@@ -27,7 +29,7 @@ class QueryCounter(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.count = len(connection.queries) - self._start
-        self.queries = connection.queries[self._start:]
+        self.queries = connection.queries[self._start :]
 
     def __str__(self):
         return "<QueryCounter: {}>".format(self.count)
@@ -69,7 +71,8 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         SkuTestSerializer(expand=owners__cars)
             We could optimize this with a custom prefetch.
     """
-    fixtures = ['test_data.json']
+
+    fixtures = ["test_data.json"]
 
     def setUp(self):
         """
@@ -81,22 +84,21 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         self.give_all_owners_all_skus()
 
     def create_skus(self):
-        variants = ['80', '90d']
+        variants = ["80", "90d"]
 
         for sku_variant in variants:
             test_models.Sku.objects.create(
-                variant=sku_variant,
-                model=self.carmodel_model_s
+                variant=sku_variant, model=self.carmodel_model_s
             )
 
     def create_owners(self):
         owners = [
-            dict(name='Elliot Alderson', email='e.alderson@allsafe.com'),
-            dict(name='Angela Moss', email='a.moss@allsafe.com'),
-            dict(name='Gideon Goddard', email='g.goddard@allsafe.com'),
+            dict(name="Elliot Alderson", email="e.alderson@allsafe.com"),
+            dict(name="Angela Moss", email="a.moss@allsafe.com"),
+            dict(name="Gideon Goddard", email="g.goddard@allsafe.com"),
         ]
 
-        allsafe = test_models.Organization.objects.create(name='Allsafe')
+        allsafe = test_models.Organization.objects.create(name="Allsafe")
 
         for owner_details in owners:
             test_models.Owner.objects.create(
@@ -118,9 +120,9 @@ class TestAutoOptimizedQueryset(CBVTestCase):
 
     def get_view_instance(self, view_class, **kwargs):
         view = self.get_instance(view_class, **kwargs)
-        view.request = RequestFactory().get('/')
+        view.request = RequestFactory().get("/")
         view.request.query_params = QueryDict(mutable=True)
-        view.format_kwarg = 'json'
+        view.format_kwarg = "json"
         return view
 
     def get(self, view_class, optimize=True, **query_params):
@@ -135,7 +137,10 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         return response
 
     def assertNumQueries(
-        self, view_class, expected_unoptimized, expected_optimized,
+        self,
+        view_class,
+        expected_unoptimized,
+        expected_optimized,
         **query_params
     ):
         """
@@ -150,107 +155,112 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         )
 
         self.assertEqual(
-            self.query_counter.count, expected_unoptimized,
+            self.query_counter.count,
+            expected_unoptimized,
             (
-                "Expected {0} unoptimized queries, actually {1}."
-                .format(expected_unoptimized, self.query_counter.count)
-            )
+                "Expected {0} unoptimized queries, actually {1}.".format(
+                    expected_unoptimized, self.query_counter.count
+                )
+            ),
         )
         response_optimized = self.get(view_class, **query_params)
         self.assertEqual(
-            self.query_counter.count, expected_optimized,
+            self.query_counter.count,
+            expected_optimized,
             (
-                "Expected {0} optimized queries, actually {1}."
-                .format(expected_optimized, self.query_counter.count)
-            )
+                "Expected {0} optimized queries, actually {1}.".format(
+                    expected_optimized, self.query_counter.count
+                )
+            ),
         )
 
         self.assertEqual(
             response_optimized.data,
             response_unoptimized.data,
-            "Optimized and unoptimized serialized results differed."
+            "Optimized and unoptimized serialized results differed.",
         )
 
-    @patch.object(test_serializers.OwnerTestSerializer, 'auto_optimize')
+    @patch.object(test_serializers.OwnerTestSerializer, "auto_optimize")
     def test_auto_expand_disabled_by_default(self, mock_auto_optimize):
         view = self.get_view_instance(test_views.OwnerAPITestView)
         view.get_queryset()
         mock_auto_optimize.assert_not_called()
 
-    @patch.object(test_serializers.OwnerTestSerializer, 'auto_optimize')
+    @patch.object(test_serializers.OwnerTestSerializer, "auto_optimize")
     def test_attribute_enabled_auto_optimization(self, mock_auto_optimize):
         """
         The extensions_auto_optimize view attribute determines optimization.
         """
-        mock_auto_optimize.return_value = 'optimized'
+        mock_auto_optimize.return_value = "optimized"
         view = self.get_view_instance(test_views.OwnerAPITestView)
         view.extensions_auto_optimize = True
         queryset = view.get_queryset()
         mock_auto_optimize.assert_called_once()
-        self.assertEqual('optimized', queryset)
+        self.assertEqual("optimized", queryset)
 
-    @patch.object(test_serializers.OwnerTestSerializer, 'auto_optimize')
+    @patch.object(test_serializers.OwnerTestSerializer, "auto_optimize")
     def test_method_enabled_auto_optimization(self, mock_auto_optimize):
         """
         The get_extensions_auto_optimize() view method determines optimization.
         """
-        mock_auto_optimize.return_value = 'optimized'
+        mock_auto_optimize.return_value = "optimized"
         view = self.get_view_instance(test_views.OwnerAPITestView)
         view.get_extensions_auto_optimize = lambda: True
         queryset = view.get_queryset()
         mock_auto_optimize.assert_called_once()
-        self.assertEqual('optimized', queryset)
+        self.assertEqual("optimized", queryset)
 
     @override_settings(
-        REST_FRAMEWORK=dict(
-            SERIALIZER_EXTENSIONS=dict(
-                AUTO_OPTIMIZE=True
-            )
-        )
+        REST_FRAMEWORK=dict(SERIALIZER_EXTENSIONS=dict(AUTO_OPTIMIZE=True))
     )
-    @patch.object(test_serializers.OwnerTestSerializer, 'auto_optimize')
+    @patch.object(test_serializers.OwnerTestSerializer, "auto_optimize")
     def test_setting_enabled_auto_optimization(self, mock_auto_optimize):
         """
         The auto_optimize setting determines optimization globally.
         """
-        mock_auto_optimize.return_value = 'optimized'
+        mock_auto_optimize.return_value = "optimized"
         view = self.get_view_instance(test_views.OwnerAPITestView)
         queryset = view.get_queryset()
         mock_auto_optimize.assert_called_once()
-        self.assertEqual('optimized', queryset)
+        self.assertEqual("optimized", queryset)
 
     def test_no_expansion(self):
         self.assertNumQueries(
             test_views.OwnerAPITestView,
-            expected_unoptimized=1, expected_optimized=1
+            expected_unoptimized=1,
+            expected_optimized=1,
         )
 
     def test_expand_foreign_key(self):
         self.assertNumQueries(
             test_views.OwnerAPITestView,
-            expected_unoptimized=2, expected_optimized=1,
-            expand='organization'
+            expected_unoptimized=2,
+            expected_optimized=1,
+            expand="organization",
         )
 
     def test_expand_many_relationship(self):
         self.assertNumQueries(
             test_views.OwnerAPITestView,
-            expected_unoptimized=2, expected_optimized=2,
-            expand='cars'
+            expected_unoptimized=2,
+            expected_optimized=2,
+            expand="cars",
         )
 
     def test_expand_id_only_many_relationship(self):
         self.assertNumQueries(
             test_views.OwnerAPITestView,
-            expected_unoptimized=2, expected_optimized=2,
-            expand_id_only='cars'
+            expected_unoptimized=2,
+            expected_optimized=2,
+            expand_id_only="cars",
         )
 
     def test_nested_expand_foreign_keys(self):
         self.assertNumQueries(
             test_views.SkuAPITestDetailView,
-            expected_unoptimized=3, expected_optimized=1,
-            expand='model__manufacturer'
+            expected_unoptimized=3,
+            expected_optimized=1,
+            expand="model__manufacturer",
         )
 
     def test_nested_expand_many_relationships(self):
@@ -260,36 +270,41 @@ class TestAutoOptimizedQueryset(CBVTestCase):
 
         self.assertNumQueries(
             test_views.ModelAPITestView,
-            expected_unoptimized=6, expected_optimized=expected_optimized,
-            expand='skus__owners'
+            expected_unoptimized=6,
+            expected_optimized=expected_optimized,
+            expand="skus__owners",
         )
 
     def test_nested_expand_foreign_key_many_relationship(self):
         self.assertNumQueries(
             test_views.SkuAPITestDetailView,
-            expected_unoptimized=3, expected_optimized=2,
-            expand='model__skus'
+            expected_unoptimized=3,
+            expected_optimized=2,
+            expand="model__skus",
         )
 
     def test_nested_expand_many_relationship_foreign_key(self):
         self.assertNumQueries(
             test_views.OwnerAPITestView,
-            expected_unoptimized=6, expected_optimized=2,
-            expand='cars__model'
+            expected_unoptimized=6,
+            expected_optimized=2,
+            expand="cars__model",
         )
 
     def test_list_select_related(self):
         self.assertNumQueries(
             test_views.SkuAPITestListView,
-            expected_unoptimized=5, expected_optimized=1,
-            expand='model'
+            expected_unoptimized=5,
+            expected_optimized=1,
+            expand="model",
         )
 
     def test_list_prefetch_related(self):
         self.assertNumQueries(
             test_views.SkuAPITestListView,
-            expected_unoptimized=5, expected_optimized=2,
-            expand='owners'
+            expected_unoptimized=5,
+            expected_optimized=2,
+            expand="owners",
         )
 
     def test_expand_self(self):
@@ -298,13 +313,15 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         """
         self.assertNumQueries(
             test_views.OwnerAPITestView,
-            expected_unoptimized=1, expected_optimized=1,
-            expand='identity'
+            expected_unoptimized=1,
+            expected_optimized=1,
+            expand="identity",
         )
         self.assertNumQueries(
             test_views.SkuAPITestDetailView,
-            expected_unoptimized=2, expected_optimized=2,
-            expand='owners__identity'
+            expected_unoptimized=2,
+            expected_optimized=2,
+            expand="owners__identity",
         )
 
     def test_expand_non_model_serializer_field(self):
@@ -314,8 +331,8 @@ class TestAutoOptimizedQueryset(CBVTestCase):
                     non_model=dict(
                         id_source=False,
                         id_model=False,
-                        source='pk',  # Irrelevant existing attribute
-                        serializer=test_serializers.NonModelTestSerializer
+                        source="pk",  # Irrelevant existing attribute
+                        serializer=test_serializers.NonModelTestSerializer,
                     )
                 )
 
@@ -323,8 +340,10 @@ class TestAutoOptimizedQueryset(CBVTestCase):
             serializer_class = Serializer
 
         self.assertNumQueries(
-            View, expected_unoptimized=6, expected_optimized=2,
-            expand='non_model__skus__model'
+            View,
+            expected_unoptimized=6,
+            expected_optimized=2,
+            expand="non_model__skus__model",
         )
 
     def test_expand_method_field_no_optimization(self):
@@ -332,23 +351,22 @@ class TestAutoOptimizedQueryset(CBVTestCase):
             class Meta(test_serializers.SkuTestSerializer.Meta):
                 expandable_fields = dict(
                     model=dict(
-                        serializer=SerializerMethodField,
-                        id_source=False
+                        serializer=SerializerMethodField, id_source=False
                     )
                 )
 
             def get_model(self, obj):
                 return self.represent_child(
-                    name='model',
+                    name="model",
                     instance=obj.model,
-                    serializer=test_serializers.ModelTestSerializer
+                    serializer=test_serializers.ModelTestSerializer,
                 )
 
         class View(test_views.SkuAPITestDetailView):
             serializer_class = Serializer
 
         self.assertNumQueries(
-            View, expected_unoptimized=2, expected_optimized=2, expand='model'
+            View, expected_unoptimized=2, expected_optimized=2, expand="model"
         )
 
     def test_expand_method_field_select_related(self):
@@ -357,29 +375,30 @@ class TestAutoOptimizedQueryset(CBVTestCase):
                 expandable_fields = dict(
                     model=dict(
                         serializer=SerializerMethodField,
-                        select_related=['model'],
-                        id_source=False
+                        select_related=["model"],
+                        id_source=False,
                     )
                 )
 
             def get_model(self, obj):
                 return self.represent_child(
-                    name='model',
+                    name="model",
                     instance=obj.model,
-                    serializer=test_serializers.ModelTestSerializer
+                    serializer=test_serializers.ModelTestSerializer,
                 )
 
         class View(test_views.SkuAPITestDetailView):
             serializer_class = Serializer
 
         self.assertNumQueries(
-            View, expected_unoptimized=2, expected_optimized=1, expand='model'
+            View, expected_unoptimized=2, expected_optimized=1, expand="model"
         )
 
     def test_expand_method_field_prefetch_related(self):
         """
         Test that a method field can manually set a prefetch related.
         """
+
         class Serializer(test_serializers.ModelTestSerializer):
             class Meta(test_serializers.ModelTestSerializer.Meta):
                 expandable_fields = dict(
@@ -387,7 +406,7 @@ class TestAutoOptimizedQueryset(CBVTestCase):
                         serializer=(
                             test_serializers.CustomPrefetchSkuSerializer
                         ),
-                        many=True
+                        many=True,
                     )
                 )
 
@@ -400,8 +419,9 @@ class TestAutoOptimizedQueryset(CBVTestCase):
 
         self.assertNumQueries(
             View,
-            expected_unoptimized=6, expected_optimized=expected_optimized,
-            expand='skus__owners'
+            expected_unoptimized=6,
+            expected_optimized=expected_optimized,
+            expand="skus__owners",
         )
 
     def test_nested_expand_method_field_prefetch_related(self):
@@ -416,13 +436,16 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         to return. There are clearly large potential gains to be made here, but
         perhaps it's too difficult to automate.
         """
+
         class View(test_views.SkuAPITestListView):
             serializer_class = test_serializers.CustomPrefetchSkuSerializer
 
         # This could be 2 if optimized fully
         self.assertNumQueries(
-            View, expected_unoptimized=21, expected_optimized=6,
-            expand='owners__organization'
+            View,
+            expected_unoptimized=21,
+            expected_optimized=6,
+            expand="owners__organization",
         )
 
     def test_auto_optimize_field_disabled(self):
@@ -432,9 +455,9 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         expandables = dict(
             test_serializers.OwnerTestSerializer.Meta.expandable_fields
         )
-        expandables['organization'] = dict(
+        expandables["organization"] = dict(
             serializer=test_serializers.OrganizationTestSerializer,
-            auto_optimize=False
+            auto_optimize=False,
         )
 
         class TestSerializer(test_serializers.OwnerTestSerializer):
@@ -445,8 +468,10 @@ class TestAutoOptimizedQueryset(CBVTestCase):
             serializer_class = TestSerializer
 
         self.assertNumQueries(
-            TestView, expected_unoptimized=2, expected_optimized=2,
-            expand='organization'
+            TestView,
+            expected_unoptimized=2,
+            expected_optimized=2,
+            expand="organization",
         )
 
     def test_id_source_select_related_if_not_on_model(self):
@@ -458,5 +483,6 @@ class TestAutoOptimizedQueryset(CBVTestCase):
         """
         self.assertNumQueries(
             test_views.OwnerPreferencesAPITestView,
-            expected_unoptimized=2, expected_optimized=1,
+            expected_unoptimized=2,
+            expected_optimized=1,
         )

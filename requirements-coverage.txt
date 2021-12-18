@@ -1,0 +1,5 @@
+# Code coveragw requirements
+# Note: These packages are stored outside of the setup.py, to maintain a
+# single source of truth, and allow the extras to be installed in isolation.
+codecov==2.0.15
+pytest-cov==2.6.1

@@ -1,0 +1,10 @@
+# Test requirements
+# Note: These packages are stored outside of the setup.py, to maintain a
+# single source of truth, and allow the extras to be installed in isolation.
+django-test-plus==1.4.0
+Django>=2.1.15,<4
+djangorestframework>=3.9.4
+mock==2.0.0
+pytest-cov==2.6.1
+pytest-django==3.4.8
+pytest==4.4.1

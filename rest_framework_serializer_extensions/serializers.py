@@ -9,14 +9,11 @@ from django.utils.module_loading import import_string
 from rest_framework import serializers
 from rest_framework.fields import empty
 
-from rest_framework_serializer_extensions import (
-    fields as custom_fields, utils
-)
+from rest_framework_serializer_extensions import fields as custom_fields, utils
 
-
-SOURCE_DELIMITER = '.'
-QUERYSET_DELIMITER = '__'
-EXPAND_DELIMITER = '__'
+SOURCE_DELIMITER = "."
+QUERYSET_DELIMITER = "__"
+EXPAND_DELIMITER = "__"
 DEFAULT_MAX_EXPAND_DEPTH = 3
 
 
@@ -33,13 +30,13 @@ def _get_serializer_hierarchy(serializer):
     Returns:
         (str) - The hierarchy
     """
-    name = serializer.field_name or ''
+    name = serializer.field_name or ""
     parent = serializer.parent
 
     while parent:
         if parent.field_name:
             if name:
-                name = '{0}__{1}'.format(parent.field_name, name)
+                name = "{0}__{1}".format(parent.field_name, name)
             else:
                 name = parent.field_name
         parent = parent.parent
@@ -76,12 +73,12 @@ def _get_nested_field_names(hierarchy, root_field_names):
     for name in root_field_names:
         # Include all fields on the serializer
         if name == hierarchy:
-            matching.add('*')
+            matching.add("*")
         elif hierarchy:
-            prefix = '{0}{1}'.format(hierarchy, EXPAND_DELIMITER)
+            prefix = "{0}{1}".format(hierarchy, EXPAND_DELIMITER)
 
             if name.startswith(prefix):
-                matching.add(name[len(prefix):])
+                matching.add(name[len(prefix) :])
         else:
             matching.add(name)
 
@@ -89,9 +86,7 @@ def _get_nested_field_names(hierarchy, root_field_names):
 
 
 def _field_names_list(field_names):
-    return ', '.join(
-        '"{0}"'.format(field_name) for field_name in field_names
-    )
+    return ", ".join('"{0}"'.format(field_name) for field_name in field_names)
 
 
 class RelatedMatcher(object):
@@ -101,7 +96,8 @@ class RelatedMatcher(object):
     Each matcher has a related name, as well as a list of select and
     prefetchable matches. This relationship can be used to optimize a queryset.
     """
-    def __init__(self, field, related_name='', parent=None):
+
+    def __init__(self, field, related_name="", parent=None):
         self.field = field
         self.related_name = related_name
         self.parent = parent
@@ -116,7 +112,7 @@ class RelatedMatcher(object):
         try:
             parent_nested_name = self.parent.nested_related_name
         except AttributeError:
-            parent_nested_name = ''
+            parent_nested_name = ""
 
         if parent_nested_name:
             return "{}{}{}".format(
@@ -134,7 +130,7 @@ class RelatedMatcher(object):
         child_matcher = RelatedMatcher(field, related_name, parent=self)
         self.child_selects.append(child_matcher)
 
-        if hasattr(field, '_construct_relations'):
+        if hasattr(field, "_construct_relations"):
             field._construct_relations(child_matcher)
 
     def to_prefetch_related(self, field, related_name):
@@ -146,7 +142,7 @@ class RelatedMatcher(object):
         child_matcher = RelatedMatcher(field, related_name, parent=self)
         self.child_prefetches.append(child_matcher)
 
-        if hasattr(field, '_construct_relations'):
+        if hasattr(field, "_construct_relations"):
             field._construct_relations(child_matcher)
 
     def optimize_queryset(self, qs, as_prefetch=False):
@@ -171,13 +167,12 @@ class RelatedMatcher(object):
 
         for prefetch_matcher in self.child_prefetches:
             prefetched_qs = prefetch_matcher.optimize_queryset(
-                prefetch_matcher._get_model().objects.all(),
-                as_prefetch=True
+                prefetch_matcher._get_model().objects.all(), as_prefetch=True
             )
             qs = qs.prefetch_related(
                 Prefetch(
                     self._matcher_lookup(prefetch_matcher, as_prefetch),
-                    queryset=prefetched_qs
+                    queryset=prefetched_qs,
                 )
             )
 
@@ -211,15 +206,14 @@ class RelatedMatcher(object):
 
     def _as_dict(self):  # pragma: no cover
         return dict(
-            name=(self.related_name or 'root'),
+            name=(self.related_name or "root"),
             select_relateds=[s._as_dict() for s in self.child_selects],
-            prefetch_relateds=[p._as_dict() for p in self.child_prefetches]
+            prefetch_relateds=[p._as_dict() for p in self.child_prefetches],
         )
 
     def __repr__(self):
         return "{cls}({details})".format(
-            cls=type(self).__name__,
-            details=pformat(self._as_dict())
+            cls=type(self).__name__, details=pformat(self._as_dict())
         )
 
 
@@ -288,6 +282,7 @@ class ExpandableFieldsMixin(object):
           iterable, and serializes additional information for the existing
           Foo instance
     """
+
     def __init__(self, *args, **kwargs):
         super(ExpandableFieldsMixin, self).__init__(*args, **kwargs)
         self.expandable_fields = self._standardise_expandable_definitions(
@@ -305,7 +300,7 @@ class ExpandableFieldsMixin(object):
             return self.Meta.max_expand_depth
         except AttributeError:
             return utils.get_setting(
-                'MAX_EXPAND_DEPTH', DEFAULT_MAX_EXPAND_DEPTH
+                "MAX_EXPAND_DEPTH", DEFAULT_MAX_EXPAND_DEPTH
             )
 
     def get_validate_expand_instructions(self):
@@ -336,17 +331,17 @@ class ExpandableFieldsMixin(object):
         expand_fields = self._get_expand_fields()
 
         for field_name, field in expand_fields.items():
-            if field_name.endswith('_id'):
+            if field_name.endswith("_id"):
                 field_definition = self.expandable_fields[field_name[:-3]]
             else:
                 field_definition = self.expandable_fields[field_name]
 
             # Allow fields to provide explicit optimizations
-            if not field_definition.get('auto_optimize', True):
+            if not field_definition.get("auto_optimize", True):
                 continue
 
-            manual_select_related = field_definition.get('select_related')
-            manual_prefetch_related = field_definition.get('prefetch_related')
+            manual_select_related = field_definition.get("select_related")
+            manual_prefetch_related = field_definition.get("prefetch_related")
 
             if manual_select_related:
                 for related_name in manual_select_related:
@@ -366,7 +361,7 @@ class ExpandableFieldsMixin(object):
                 continue
 
             # Retrieve prefetch related calls for lists
-            if getattr(field, 'many', False):
+            if getattr(field, "many", False):
                 matcher.to_prefetch_related(field.child, related_name)
             # Retrieve select related calls for individual instance
             else:
@@ -400,10 +395,9 @@ class ExpandableFieldsMixin(object):
             model = model_field.related_model
 
             # Ignore concrete ID-only references
-            is_id_only_concrete_fk = (
-                related_part.endswith('_id') and
-                isinstance(model_field, ForeignKey)
-            )
+            is_id_only_concrete_fk = related_part.endswith(
+                "_id"
+            ) and isinstance(model_field, ForeignKey)
 
             if model is None or is_id_only_concrete_fk:
                 break
@@ -426,35 +420,35 @@ class ExpandableFieldsMixin(object):
             definition = dict(serializer=definition)
 
         # Resolve string references to serializers
-        if isinstance(definition['serializer'], str):
-            reference = definition['serializer']
+        if isinstance(definition["serializer"], str):
+            reference = definition["serializer"]
             serializer = import_string(reference)
-            assert issubclass(serializer, serializers.BaseSerializer), (
-                "{0} is not a serializer".format(reference)
-            )
-            definition['serializer'] = serializer
+            assert issubclass(
+                serializer, serializers.BaseSerializer
+            ), "{0} is not a serializer".format(reference)
+            definition["serializer"] = serializer
 
         # Custom expansion uses no other fields
-        if definition['serializer'] == serializers.SerializerMethodField:
-            definition['id_source'] = False
+        if definition["serializer"] == serializers.SerializerMethodField:
+            definition["id_source"] = False
             return definition
 
         # The model used for the HashId (defaults to the serializer's model)
         if (
-            definition.get('id_source') is not False and
-            'id_model' not in definition
+            definition.get("id_source") is not False
+            and "id_model" not in definition
         ):
-            definition['id_model'] = definition['serializer'].Meta.model
+            definition["id_model"] = definition["serializer"].Meta.model
 
         # read_only defaults to True
-        if 'read_only' not in definition:
-            definition['read_only'] = True
+        if "read_only" not in definition:
+            definition["read_only"] = True
 
         return definition
 
     def _parse_root_instructions(self):
-        expand_full = set(self.context.get('expand', []))
-        expand_id_only = set(self.context.get('expand_id_only', []))
+        expand_full = set(self.context.get("expand", []))
+        expand_id_only = set(self.context.get("expand_id_only", []))
 
         # ID-only fields implicitly require full expansion of their parents
         for nested_field_name in expand_id_only:
@@ -503,12 +497,13 @@ class ExpandableFieldsMixin(object):
             instructions[method] = {
                 n.split(EXPAND_DELIMITER)[0]
                 for n in _get_nested_field_names(hierarchy, root_nested_names)
-                if n != '*'
+                if n != "*"
             }
 
-        instructions['id_only'] = {
-            name for name in instructions['id_only']
-            if name not in instructions['full']
+        instructions["id_only"] = {
+            name
+            for name in instructions["id_only"]
+            if name not in instructions["full"]
         }
 
         return instructions
@@ -524,26 +519,29 @@ class ExpandableFieldsMixin(object):
         Returns:
             (rest_framework.fields.Field)
         """
-        if hasattr(self, 'get_{0}_id'.format(field_name)):
-            return serializers.SerializerMethodField(source='*')
+        if hasattr(self, "get_{0}_id".format(field_name)):
+            return serializers.SerializerMethodField(source="*")
 
-        kwargs = dict(read_only=field_definition['read_only'])
+        kwargs = dict(read_only=field_definition["read_only"])
 
-        if 'id_source' in field_definition:
-            kwargs.update(source=field_definition['id_source'])
+        if "id_source" in field_definition:
+            kwargs.update(source=field_definition["id_source"])
 
-        if utils.get_setting('USE_HASH_IDS', False):
-            kwargs.update(pk_field=(
-                custom_fields.HashIdField(model=field_definition['id_model'])
-            ))
+        if utils.get_setting("USE_HASH_IDS", False):
+            kwargs.update(
+                pk_field=(
+                    custom_fields.HashIdField(
+                        model=field_definition["id_model"]
+                    )
+                )
+            )
 
         # If the field is to be writable, PrimaryKeyRelatedField needs a
         # queryset from which to find instances
-        if not field_definition['read_only']:
-            kwargs['queryset'] = (
-                utils.model_from_definition(field_definition['id_model'])
-                .objects.all()
-            )
+        if not field_definition["read_only"]:
+            kwargs["queryset"] = utils.model_from_definition(
+                field_definition["id_model"]
+            ).objects.all()
 
         return serializers.PrimaryKeyRelatedField(**kwargs)
 
@@ -558,36 +556,37 @@ class ExpandableFieldsMixin(object):
         Returns:
             (rest_framework.fields.Field)
         """
-        method_field_name = 'get_{0}_id_only'.format(field_name)
+        method_field_name = "get_{0}_id_only".format(field_name)
 
         # A SerializerMethodField can be used for custom ID generation
         if hasattr(self, method_field_name):
             return serializers.SerializerMethodField(
-                method_name=method_field_name,
-                source='*'
+                method_name=method_field_name, source="*"
             )
 
-        if not field_definition.get('many'):
-            raise ValueError(
-                "Can only expand as ID-only on *-to-many fields"
-            )
+        if not field_definition.get("many"):
+            raise ValueError("Can only expand as ID-only on *-to-many fields")
 
         kwargs = dict(many=True, read_only=True)
 
-        if 'source' in field_definition:
-            kwargs.update(source=field_definition['source'])
+        if "source" in field_definition:
+            kwargs.update(source=field_definition["source"])
 
-        if utils.get_setting('USE_HASH_IDS', False):
-            kwargs.update(pk_field=(
-                custom_fields.HashIdField(model=field_definition['id_model'])
-            ))
+        if utils.get_setting("USE_HASH_IDS", False):
+            kwargs.update(
+                pk_field=(
+                    custom_fields.HashIdField(
+                        model=field_definition["id_model"]
+                    )
+                )
+            )
 
         return serializers.PrimaryKeyRelatedField(**kwargs)
 
     def _validate_instructions(self, instructions, standard_fields):
         if (
-            self.get_validate_expand_instructions() is False or
-            self.context.get('validate_expand_instructions') is False
+            self.get_validate_expand_instructions() is False
+            or self.context.get("validate_expand_instructions") is False
         ):
             return
 
@@ -596,7 +595,7 @@ class ExpandableFieldsMixin(object):
 
             # Allow unmatched full expand instructions provided that the
             # field name matches a standard field. This allows
-            if method == 'full':
+            if method == "full":
                 valid_field_names.update(set(standard_fields))
 
             unmatched_names = field_names.difference(valid_field_names)
@@ -605,7 +604,7 @@ class ExpandableFieldsMixin(object):
                 raise ValueError(
                     '{0} fields not expandable for serializer "{1}"'.format(
                         _field_names_list(unmatched_names),
-                        self.__class__.__name__
+                        self.__class__.__name__,
                     )
                 )
 
@@ -634,31 +633,31 @@ class ExpandableFieldsMixin(object):
         for field_name, field_definition in field_iterator:
             # Always provide an ID reference for ForeignKeys
             if (
-                not field_definition.get('many') and
-                field_definition.get('id_source') is not False
+                not field_definition.get("many")
+                and field_definition.get("id_source") is not False
             ):
-                id_field_name = '{0}_id'.format(field_name)
-                expanded_fields[id_field_name] = (
-                    self.get_expand_id_field(field_name, field_definition)
+                id_field_name = "{0}_id".format(field_name)
+                expanded_fields[id_field_name] = self.get_expand_id_field(
+                    field_name, field_definition
                 )
-                if not field_definition.get('read_only'):
+                if not field_definition.get("read_only"):
                     self._id_fields_to_translate.append(id_field_name)
 
             # Serialize the full instance(s) if required
-            if field_name in instructions['full']:
+            if field_name in instructions["full"]:
                 kwargs = dict()
 
-                if 'source' in field_definition:
-                    kwargs.update(source=field_definition['source'])
-                if field_definition.get('many'):
+                if "source" in field_definition:
+                    kwargs.update(source=field_definition["source"])
+                if field_definition.get("many"):
                     kwargs.update(many=True)
 
-                expanded_fields[field_name] = (
-                    field_definition['serializer'](**kwargs)
+                expanded_fields[field_name] = field_definition["serializer"](
+                    **kwargs
                 )
 
             # Serialize the IDs only for *-to-many fields if required
-            elif field_name in instructions['id_only']:
+            elif field_name in instructions["id_only"]:
                 expanded_fields[field_name] = self.get_expand_id_list_field(
                     field_name, field_definition
                 )
@@ -672,8 +671,8 @@ class ExpandableFieldsMixin(object):
         After running, <fieldname>_id fields should contain IDs, while
         <fieldname>_id_resolved fields should contain resolved instances.
         """
-        validated_data = (
-            super(ExpandableFieldsMixin, self).run_validation(data=data)
+        validated_data = super(ExpandableFieldsMixin, self).run_validation(
+            data=data
         )
         for id_field_name in self._id_fields_to_translate:
             if id_field_name in validated_data:
@@ -681,7 +680,7 @@ class ExpandableFieldsMixin(object):
                 instance = validated_data[id_field_name]
 
                 # Create a new field to contain the resolved instance.
-                resolved_field_name = '{0}_resolved'.format(id_field_name)
+                resolved_field_name = "{0}_resolved".format(id_field_name)
                 validated_data[resolved_field_name] = instance
 
                 # Translate ID field contents back to an ID
@@ -694,6 +693,7 @@ class OnlyFieldsMixin(object):
     """
     Reduce a serializer's fields to only the ones specified.
     """
+
     def get_fields(self):
         """
         Restrict the fields based on a set of names if provided.
@@ -701,7 +701,7 @@ class OnlyFieldsMixin(object):
         fields = super(OnlyFieldsMixin, self).get_fields()
 
         try:
-            only = self.context['only']
+            only = self.context["only"]
         except KeyError:
             return fields
 
@@ -714,15 +714,14 @@ class OnlyFieldsMixin(object):
 
         # Include all fields if either explicitly told to, or no fields were
         # matched (which can only occur if a parent had been whitelisted).
-        if only_names == set() or only_names == {'*'}:
+        if only_names == set() or only_names == {"*"}:
             return fields
 
-        if '*' in only_names:
+        if "*" in only_names:
             raise ValueError(
                 'Cannot serialize {0} fields for serializer "{1}". '
-                'Either serialize some fields, or all'.format(
-                    _field_names_list(only_names),
-                    self.__class__.__name__
+                "Either serialize some fields, or all".format(
+                    _field_names_list(only_names), self.__class__.__name__
                 )
             )
 
@@ -731,8 +730,7 @@ class OnlyFieldsMixin(object):
         if unmatched_names:
             raise ValueError(
                 '{0} fields not found on serializer "{1}"'.format(
-                    _field_names_list(unmatched_names),
-                    self.__class__.__name__
+                    _field_names_list(unmatched_names), self.__class__.__name__
                 )
             )
 
@@ -747,6 +745,7 @@ class ExcludeFieldsMixin(object):
     """
     Reduce a serializer's fields by removing the specified fields.
     """
+
     def get_fields(self):
         """
         Exclude the fields based on a set of names if provided.
@@ -754,7 +753,7 @@ class ExcludeFieldsMixin(object):
         fields = super(ExcludeFieldsMixin, self).get_fields()
 
         try:
-            exclude = self.context['exclude']
+            exclude = self.context["exclude"]
         except KeyError:
             return fields
 
@@ -771,8 +770,7 @@ class ExcludeFieldsMixin(object):
         if unmatched_names:
             raise ValueError(
                 '{0} fields not found on serializer "{1}"'.format(
-                    _field_names_list(unmatched_names),
-                    self.__class__.__name__
+                    _field_names_list(unmatched_names), self.__class__.__name__
                 )
             )
 
@@ -795,9 +793,8 @@ class SerializerHelpersMixin(object):
         The child serializer is invoked with the same context as the parent,
         and is bound to the parent.
         """
-        if (
-            isinstance(instance, QuerySet) and
-            self.context.get('auto_optimize')
+        if isinstance(instance, QuerySet) and self.context.get(
+            "auto_optimize"
         ):
             serializer_instance = serializer(context=self.context)
             serializer_instance.bind(name, self)
@@ -811,8 +808,10 @@ class SerializerHelpersMixin(object):
 
 
 class SerializerExtensionsMixin(
-    OnlyFieldsMixin, ExcludeFieldsMixin, ExpandableFieldsMixin,
-    SerializerHelpersMixin
+    OnlyFieldsMixin,
+    ExcludeFieldsMixin,
+    ExpandableFieldsMixin,
+    SerializerHelpersMixin,
 ):
     """
     A collection of serializer extensions, which allow for:
@@ -827,9 +826,7 @@ class SerializerExtensionsMixin(
     """
 
 
-class ExtensionsSerializer(
-    SerializerExtensionsMixin, serializers.Serializer
-):
+class ExtensionsSerializer(SerializerExtensionsMixin, serializers.Serializer):
     pass
 
 

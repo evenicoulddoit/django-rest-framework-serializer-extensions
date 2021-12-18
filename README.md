@@ -143,7 +143,7 @@ in much the same way.
 Install testing requirements.
 
 ```bash
-$ pip install -r requirements.txt
+$ pip install -e .[test]
 ```
 
 Run with runtests.
@@ -163,10 +163,10 @@ $ tox
 
 
 ## Documentation
-To build the documentation, you’ll need to install `mkdocs`.
+To build the documentation, you’ll need to install `mkdocs`. These are included in the development extras:
 
 ```bash
-$ pip install mkdocs
+$ pip install -e .[dev]
 ```
 
 To preview the documentation:
