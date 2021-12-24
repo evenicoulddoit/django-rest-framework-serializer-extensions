@@ -10,7 +10,7 @@ from rest_framework_serializer_extensions.views import SerializerExtensionsAPIVi
 from app import models
 
 
-class RetriveOwnerAPIView(SerializerExtensionsAPIViewMixin, RetrieveAPIView):
+class RetrieveOwnerAPIView(SerializerExtensionsAPIViewMixin, RetrieveAPIView):
     queryset = models.Owner.objects.all()
     serializer_class = OwnerSerializer
     ...
@@ -67,7 +67,7 @@ class DynamicAPIView(SerializerExtensionsAPIViewMixin, RetrieveAPIView):
         return context
 ```
 
-Whilst the view sets the *defaults*, the extension context can be overriden
+Whilst the view sets the *defaults*, the extension context can be overridden
 by the end using through query parameters.
 
 # Disabling query parameter modification
