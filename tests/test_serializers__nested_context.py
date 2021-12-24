@@ -16,13 +16,17 @@ from tests.base import SerializerMixinTestCase
 
 class OrganizationTestSerializer(ExtensionsModelSerializer):
     foo = serializers.SerializerMethodField()
+    zulu = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Organization
-        fields = ("id", "name", "foo")
+        fields = ("id", "name", "foo", "zulu")
 
     def get_foo(self, _):
         return self.context["request"].query_params.get("foo")
+
+    def get_zulu(self, _):
+        return self.context["zulu"]
 
 
 class OwnerTestSerializer(ExtensionsModelSerializer):
@@ -36,11 +40,15 @@ class OwnerAPITestView(SerializerExtensionsAPIViewMixin, RetrieveAPIView):
     queryset = models.Owner.objects.all()
     serializer_class = OwnerTestSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update(zulu=1)
+        return context
+
 
 class NestedContextTests(CBVTestCase, SerializerMixinTestCase):
-    """Test that the nested serializers receive the full request context."""
-
     def test_expanded_serializer_receives_context(self):
+        """Test the nested serializers have access to the context"""
         query_params = QueryDict(mutable=True)
         request = RequestFactory().get("/")
         request.query_params = query_params
@@ -54,4 +62,8 @@ class NestedContextTests(CBVTestCase, SerializerMixinTestCase):
         query_params.update(foo="bar")
         response = view.get(request)
 
+        # The foo value should be derived from the request's query params
         self.assertEqual("bar", response.data["organization"]["foo"])
+
+        # The zulu value should be dervied from the view's context
+        self.assertEqual(1, response.data["organization"]["zulu"])
