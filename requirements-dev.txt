@@ -4,4 +4,4 @@
 black==19.10b0
 flake8==3.9.0
 isort==5.8.0
-wheel==0.24.0  # for PyPI installs
+wheel==0.38.1  # for PyPI installs
