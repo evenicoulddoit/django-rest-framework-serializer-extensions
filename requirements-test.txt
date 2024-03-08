@@ -5,5 +5,7 @@ django-test-plus==1.4.0
 Django>=3.2,<5.1
 djangorestframework>=3.12
 pytest-cov==2.6.1
-pytest-django==3.4.8
-pytest==4.4.1
+pytest-django==4.8.0
+pytest==8.0.0
+pytz==2024.1
+setuptools==69.1.0
