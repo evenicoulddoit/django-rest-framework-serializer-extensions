@@ -24,9 +24,11 @@ API, we suggest you consider switching to HashIds instead.
 ## Requirements
 Tested against:
 
-* Python (3.6, 3.7, 3.8)
-* [Django](https://github.com/django/django) (2.1, 2.2, 3.0)
-* [Django REST Framework](https://github.com/tomchristie/django-rest-framework) (3.9, 3.10, 3.11)
+* Python (3.8, 3.9, 3.10, 3.11, 3.12)
+* [Django](https://github.com/django/django) (3.2, 4.2, 5.0)
+* [Django REST Framework](https://github.com/tomchristie/django-rest-framework) 
+  (3.12, 3.13, 3.14, 3.15). Note Django REST Framework 3.15 is the first version to
+  officially support Django 4.2+.
 * [HashIds](https://github.com/davidaurelio/hashids-python) (>1.0)
 
 
@@ -183,7 +185,7 @@ $ mkdocs build
 ```
 
 
-[build-status-image]: https://secure.travis-ci.org/evenicoulddoit/django-rest-framework-serializer-extensions.svg?branch=master
+[build-status-image]: https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions/actions/workflows/test.yml/badge.svg?branch=master
 [gh-actions]: https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions/actions/workflows/test.yml?query=branch%3Amaster
 [coverage-status-image]: https://img.shields.io/codecov/c/github/evenicoulddoit/django-rest-framework-serializer-extensions/master.svg
 [codecov]: http://codecov.io/github/evenicoulddoit/django-rest-framework-serializer-extensions?branch=master
