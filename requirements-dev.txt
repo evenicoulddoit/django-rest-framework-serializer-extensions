@@ -1,7 +1,7 @@
 # Development / CI requirements
 # Note: These packages are stored outside of the setup.py, to maintain a
 # single source of truth, and allow the extras to be installed in isolation.
-black==19.10b0
-flake8==3.9.0
-isort==5.8.0
-wheel==0.24.0  # for PyPI installs
+black==24.2.0
+flake8==7.0.0
+isort==5.13.2
+wheel==0.42.0  # for PyPI installs
