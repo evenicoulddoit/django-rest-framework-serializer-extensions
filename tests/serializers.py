@@ -1,6 +1,7 @@
 """
 A collection of complete extensions serializers to be used by various tests.
 """
+
 from rest_framework import serializers
 
 from rest_framework_serializer_extensions.serializers import (
