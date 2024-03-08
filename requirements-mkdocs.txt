@@ -1,1 +1,1 @@
-mkdocs==0.16.1  # for documentation previews/deploys
+mkdocs==1.5.3  # for documentation previews/deploys
