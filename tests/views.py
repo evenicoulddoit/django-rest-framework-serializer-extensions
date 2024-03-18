@@ -1,6 +1,7 @@
 """
 A collection of complete extensions views to be used by various tests.
 """
+
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from rest_framework_serializer_extensions.views import (

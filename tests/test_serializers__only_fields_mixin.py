@@ -178,7 +178,7 @@ class OnlyFieldsSerializerMixinTests(SerializerMixinTestCase):
             ),
             dict(
                 name=self.carmodel_model_s.name,
-                manufacturer=dict(name=self.manufacturer_tesla.name,),
+                manufacturer=dict(name=self.manufacturer_tesla.name),
                 skus=[
                     dict(variant=self.sku_p100d.variant),
                     dict(variant=self.sku_70.variant),

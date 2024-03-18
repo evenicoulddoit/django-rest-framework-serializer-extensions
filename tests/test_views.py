@@ -167,7 +167,7 @@ class GetSerializerContextTests(CBVTestCase):
         )
 
     @patch.object(
-        SerializerExtensionsAPIViewMixin, "get_extensions_auto_optimize",
+        SerializerExtensionsAPIViewMixin, "get_extensions_auto_optimize"
     )
     def test_auto_optimization_included(self, mock_get_auto_optimize):
         """

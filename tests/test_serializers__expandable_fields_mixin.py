@@ -37,7 +37,8 @@ class CarModelTestSerializer(
         expandable_fields = dict(
             manufacturer=ManufacturerTestSerializer,
             skus=dict(
-                serializer="{0}.SkuTestSerializer".format(MODULE), many=True
+                serializer="{0}.SkuTestSerializer".format(MODULE),
+                many=True,
             ),
         )
 
@@ -49,7 +50,8 @@ class SkuTestSerializer(ExpandableFieldsMixin, serializers.ModelSerializer):
         expandable_fields = dict(
             model=CarModelTestSerializer,
             owners=dict(
-                serializer="{0}.OwnerTestSerializer".format(MODULE), many=True,
+                serializer="{0}.OwnerTestSerializer".format(MODULE),
+                many=True,
             ),
         )
 
@@ -434,7 +436,7 @@ class ExpandableFieldsSerializerMixinTests(SerializerMixinTestCase):
         """
         self.assertDictEqual(
             OwnerWithMethodFieldTestSerializer(self.owner_tyrell).data,
-            dict(id=self.owner_tyrell.pk, name=self.owner_tyrell.name,),
+            dict(id=self.owner_tyrell.pk, name=self.owner_tyrell.name),
         )
 
     def test_method_field_serializer_expanded(self):

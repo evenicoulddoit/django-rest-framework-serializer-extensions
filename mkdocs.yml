@@ -5,7 +5,7 @@ site_dir: html
 theme: readthedocs
 extra_css:
   - css/extra.css
-pages:
+nav:
   - Home: 'index.md'
   - Overview: 'overview.md'
   - Installation: 'installation.md'
