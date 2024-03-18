@@ -5,12 +5,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+* Support for Python 3.9, 3.10, 3.11, and 3.12
+* Support for Django 3.2, 4.2, and 5.0
+* Support for Django REST Framework 3.12, 3.13, 3.14, and 3.15
+
 ### Changed
 * Switches from Travis CI to Github Actions
 * Introduced `black` and `isort` to standardise coding style
 * Restructures requirements to create single source of truth
 * Drops `./runtest` executable, `pytest` now direct route
 * Drops `mock` dependency, in favour of `unittest.mock`
+
+### Removed
+* Support for Python <= 3.7 (EOL 2023)
+* Support for Django <= 3.1 (EOL 2021)
+* Support for Django REST Framework <= 3.11
 
 ## [2.0.1] - 2020-09-20
 ### Fixed
